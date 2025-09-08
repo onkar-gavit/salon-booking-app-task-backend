@@ -1,0 +1,50 @@
+service: auth-service
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: ${env:CUSTOM_AWS_REGION}
+  # httpApi:
+  #   id: ${file(serverless-id.json):http_api_id}  
+  environment:
+    FIREBASE_SECRET_NAME: ${env:FIREBASE_SECRET_NAME}
+    CUSTOM_AWS_REGION: ${env:CUSTOM_AWS_REGION}
+    DATABASE_URL: ${env:DATABASE_URL}
+    # LOG_LEVEL: ${env:LOG_LEVEL, 'info'}
+
+iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - ssm:GetParameter
+            - ssm:GetParameters
+          Resource:
+            - Fn::Sub: arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${env:FIREBASE_SECRET_NAME}
+
+
+functions:
+  register:
+    handler:  src/handlers/registerUserHandler.registerHandler
+    events:
+      - httpApi:
+          path: /auth/register
+          method: post
+
+plugins:
+  - serverless-offline
+  - serverless-dotenv-plugin
+
+package:
+  individually: true
+  patterns:
+    - '!tests/**'
+    - '!coverage/**'
+    - '!.env**'
+    - '!**/*.spec.ts'
+    - '!package.json'
+    - '!src/**'
+    - 'dist/**'
+    - '../../../libs/generated/client/**'
+    - '../../../node_modules/@prisma/client/**'
+    - '../../../node_modules/.prisma/client/**'

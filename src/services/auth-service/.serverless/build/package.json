@@ -1,0 +1,21 @@
+{
+  "name": "salon-app-Backend2",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {},
+  "scripts": {
+    "deploy": "serverless deploy",
+    "deploy:prod": "serverless deploy --stage prod",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "build": "yarn clean && tsc",
+    "dev": "serverless offline",
+    "clean": "rimraf dist",
+    "prune": "serverless prune -n 3",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write .",
+    "remove": "serverless remove"
+  }
+}
