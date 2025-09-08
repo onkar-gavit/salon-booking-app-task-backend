@@ -21,7 +21,16 @@ iam:
             - ssm:GetParameters
           Resource:
             - Fn::Sub: arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${env:FIREBASE_SECRET_NAME}
-
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:Query
+            - dynamodb:Scan
+          Resource:
+            - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/IdempotencyTable
 
 functions:
   register:
@@ -30,6 +39,23 @@ functions:
       - httpApi:
           path: /auth/register
           method: post
+
+resources:
+  Resources:
+    IdempotencyTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: IdempotencyTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TimeToLiveSpecification:
+          AttributeName: ttl
+          Enabled: true
 
 plugins:
   - serverless-offline

@@ -5,7 +5,6 @@ import { formatResponse } from "../utils/responseFormat";
 import { handleError } from "../utils/errors";
 import { AuthenticatedEvent } from "../models/auth.models";
 import { authMiddleware } from "../../../../../libs/middleware/authMiddleware";
-import { idempotencyMiddleware } from "../../../../../libs/middleware/idempotencyMiddleware";
 import { validateRequest } from "../../../../../libs/middleware/validateRequest.middleware";
 import middy from "@middy/core";
 
@@ -17,7 +16,7 @@ const baseHandler = async (
     const { uid } = event.user;
 
     // parsed body already validated by validateRequest middleware
-    const parsed = event.body as unknown as {
+    const parsed = JSON.parse(event.body || '{}') as {
       email: string;
       name: string;
     };
@@ -42,5 +41,5 @@ const baseHandler = async (
 // Wrap with Middy + middlewares
 export const registerHandler = middy(baseHandler)
   .use(authMiddleware())
-  .use(validateRequest(registerSchema)) // reusable schema validation
-  .use(idempotencyMiddleware()); // idempotency check
+  .use(validateRequest(registerSchema)); // reusable schema validation
+  // .use(idempotencyMiddleware()); // temporarily disabled until DynamoDB permissions are deployed

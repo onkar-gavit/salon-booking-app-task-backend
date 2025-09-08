@@ -91,7 +91,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
-          "S3Key": "serverless/auth-service/dev/1757321495767-2025-09-08T08:51:35.767Z/auth-service-register.zip"
+          "S3Key": "serverless/auth-service/dev/1757335790319-2025-09-08T12:49:50.319Z/auth-service-register.zip"
         },
         "Handler": "src/handlers/registerUserHandler.registerHandler",
         "Runtime": "nodejs18.x",
@@ -117,14 +117,14 @@
         "RegisterLogGroup"
       ]
     },
-    "RegisterLambdaVersionwdB6uKKDwIISTCSq1SszWa6u8YPjRT88VvQsSliEHM": {
+    "RegisterLambdaVersiondikOdzoC43PiPy2q8fFRRIzAQ17GMwpozWUAsyJxPs": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "RegisterLambdaFunction"
         },
-        "CodeSha256": "qAjjpEy+jOUked12MUuqQcXp3pBzZhyqtua2kYCpT/s="
+        "CodeSha256": "smH/7jDf3f/spVhvxzwLH2UpslktTsadCX6hvAQi1UU="
       }
     },
     "HttpApi": {
@@ -221,6 +221,29 @@
         }
       },
       "DependsOn": "HttpApiIntegrationRegister"
+    },
+    "IdempotencyTable": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "TableName": "IdempotencyTable",
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "id",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "id",
+            "KeyType": "HASH"
+          }
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "TimeToLiveSpecification": {
+          "AttributeName": "ttl",
+          "Enabled": true
+        }
+      }
     }
   },
   "Outputs": {
@@ -233,7 +256,7 @@
     "RegisterLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "RegisterLambdaVersionwdB6uKKDwIISTCSq1SszWa6u8YPjRT88VvQsSliEHM"
+        "Ref": "RegisterLambdaVersiondikOdzoC43PiPy2q8fFRRIzAQ17GMwpozWUAsyJxPs"
       },
       "Export": {
         "Name": "sls-auth-service-dev-RegisterLambdaFunctionQualifiedArn"
