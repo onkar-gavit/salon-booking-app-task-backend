@@ -1,0 +1,66 @@
+# Development files
+src/
+tsconfig.json
+*.ts
+*.map
+
+# Test files
+**/*.test.*
+**/*.spec.*
+__tests__/
+coverage/
+jest.config.*
+
+# Documentation
+README.md
+*.md
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Development dependencies (keep only production dependencies)
+node_modules/aws-sdk/
+node_modules/@types/
+node_modules/typescript/
+node_modules/ts-node/
+node_modules/jest/
+node_modules/@jest/
+node_modules/ts-jest/
+
+# Git
+.git/
+.gitignore
+
+# Environment files (these should be handled via serverless environment variables)
+.env.local
+.env.development
+.env.test
+
+# Build artifacts that aren't needed
+*.tsbuildinfo
+
+# Serverless artifacts
+.serverless/
+
+# Yarn/npm
+yarn-error.log
+package-lock.json

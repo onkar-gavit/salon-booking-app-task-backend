@@ -1,0 +1,79 @@
+service: customer-service
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: ${env:CUSTOM_AWS_REGION}
+  # httpApi:
+  #   id: ${file(serverless-id.json):http_api_id}  
+  environment:
+    DATABASE_URL: ${env:DATABASE_URL}
+    FIREBASE_SECRET_NAME: ${env:FIREBASE_SECRET_NAME}
+    FIREBASE_WEB_API_KEY: ${env:FIREBASE_WEB_API_KEY}
+    CUSTOM_AWS_REGION: ${env:CUSTOM_AWS_REGION}
+    # LOG_LEVEL: ${env:LOG_LEVEL, 'info'}
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - ssm:GetParameter
+            - ssm:GetParameters
+          Resource:
+            - Fn::Sub: arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${env:FIREBASE_SECRET_NAME}
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:Query
+            - dynamodb:Scan
+          Resource:
+            - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/IdempotencyTable
+
+build:
+  esbuild: false
+
+functions:
+  createCustomer:
+    handler: src/handlers/createCustomerHandler.handler
+    events:
+      - http:
+          path: /customers
+          method: post
+          cors: true
+  
+  upsertCustomer:
+    handler: src/handlers/upsertCustomerHandler.handler
+    events:
+      - http:
+          path: /customers/upsert
+          method: post
+          cors: true
+
+# resources:
+  # Resources:
+    # IdempotencyTable removed - using shared table from auth-service
+    # The table is referenced via ARN in IAM permissions above
+
+plugins:
+  - serverless-webpack
+  - serverless-offline
+  - serverless-dotenv-plugin
+
+custom:
+  webpack:
+    webpackConfig: 'webpack.config.js'
+    includeModules: true
+    packager: 'yarn'
+    keepOutputDirectory: true
+
+package:
+  individually: true
+  patterns:
+    - '!../../../node_modules/**'
+    - '../../../libs/generated/client/**'
+    - '../../../node_modules/@prisma/client/**'
+    - '../../../node_modules/.prisma/client/**'

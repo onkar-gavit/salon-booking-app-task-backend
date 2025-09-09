@@ -115,7 +115,7 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
-                "S3Key": "serverless/auth-service/dev/1757400605038-2025-09-09T06:50:05.038Z/auth-service-register.zip"
+                "S3Key": "serverless/auth-service/dev/1757414748751-2025-09-09T10:45:48.751Z/auth-service-register.zip"
               },
               "Handler": "src/handlers/registerUserHandler.registerHandler",
               "Runtime": "nodejs18.x",
@@ -147,7 +147,7 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
-                "S3Key": "serverless/auth-service/dev/1757400605038-2025-09-09T06:50:05.038Z/auth-service-login.zip"
+                "S3Key": "serverless/auth-service/dev/1757414748751-2025-09-09T10:45:48.751Z/auth-service-login.zip"
               },
               "Handler": "src/handlers/loginHandler.loginHandler",
               "Runtime": "nodejs18.x",
@@ -174,24 +174,24 @@
               "LoginLogGroup"
             ]
           },
-          "LoginLambdaVersionH9cbSo4TFrRH0X839a1dHB3YbIgDwuDRpxATVldPog": {
-            "Type": "AWS::Lambda::Version",
-            "DeletionPolicy": "Retain",
-            "Properties": {
-              "FunctionName": {
-                "Ref": "LoginLambdaFunction"
-              },
-              "CodeSha256": "/EfUXkyLKrjOlftOibMXw1EOhNZkQMkGb948UlldRuw="
-            }
-          },
-          "RegisterLambdaVersionbE5087jG1wYk06kHOwdPH2DkL43y5Z986QTjXH9X7U": {
+          "RegisterLambdaVersionWNlNl7etxiOdgh6c6JbpHVSJJtkqvt5WSfhvE8nUD18": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "RegisterLambdaFunction"
               },
-              "CodeSha256": "TrO/yMIWKK0h0D5NPnLhh8Za4kaPzlJ/TsAYR58NCG8="
+              "CodeSha256": "gbeXwv/GtgXvRVBcqg+nal+W6jE5dAC3sZ4szAGyP+0="
+            }
+          },
+          "LoginLambdaVersionqY3s60v4NKv8n48gVkN0JBhtATTukzn6Vn447OJakA": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "LoginLambdaFunction"
+              },
+              "CodeSha256": "Bp69P9PyI2fd1dmjCxR5JvfnQWEru9ZXJjJ5R41jTQE="
             }
           },
           "HttpApi": {
@@ -389,22 +389,22 @@
               "Name": "sls-auth-service-dev-ServerlessDeploymentBucketName"
             }
           },
-          "LoginLambdaFunctionQualifiedArn": {
-            "Description": "Current Lambda function version",
-            "Value": {
-              "Ref": "LoginLambdaVersionH9cbSo4TFrRH0X839a1dHB3YbIgDwuDRpxATVldPog"
-            },
-            "Export": {
-              "Name": "sls-auth-service-dev-LoginLambdaFunctionQualifiedArn"
-            }
-          },
           "RegisterLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "RegisterLambdaVersionbE5087jG1wYk06kHOwdPH2DkL43y5Z986QTjXH9X7U"
+              "Ref": "RegisterLambdaVersionWNlNl7etxiOdgh6c6JbpHVSJJtkqvt5WSfhvE8nUD18"
             },
             "Export": {
               "Name": "sls-auth-service-dev-RegisterLambdaFunctionQualifiedArn"
+            }
+          },
+          "LoginLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "LoginLambdaVersionqY3s60v4NKv8n48gVkN0JBhtATTukzn6Vn447OJakA"
+            },
+            "Export": {
+              "Name": "sls-auth-service-dev-LoginLambdaFunctionQualifiedArn"
             }
           },
           "HttpApiId": {
@@ -474,7 +474,7 @@
         "timeout": 6,
         "runtime": "nodejs18.x",
         "vpc": {},
-        "versionLogicalId": "RegisterLambdaVersionbE5087jG1wYk06kHOwdPH2DkL43y5Z986QTjXH9X7U"
+        "versionLogicalId": "RegisterLambdaVersionWNlNl7etxiOdgh6c6JbpHVSJJtkqvt5WSfhvE8nUD18"
       },
       "login": {
         "handler": "src/handlers/loginHandler.loginHandler",
@@ -499,7 +499,7 @@
         "timeout": 6,
         "runtime": "nodejs18.x",
         "vpc": {},
-        "versionLogicalId": "LoginLambdaVersionH9cbSo4TFrRH0X839a1dHB3YbIgDwuDRpxATVldPog"
+        "versionLogicalId": "LoginLambdaVersionqY3s60v4NKv8n48gVkN0JBhtATTukzn6Vn447OJakA"
       }
     },
     "resources": {
@@ -596,7 +596,7 @@
         ],
         "artifactsS3KeyDirname": "serverless/auth-service/dev/code-artifacts",
         "deploymentBucket": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
-        "artifactDirectoryName": "serverless/auth-service/dev/1757400605038-2025-09-09T06:50:05.038Z"
+        "artifactDirectoryName": "serverless/auth-service/dev/1757414748751-2025-09-09T10:45:48.751Z"
       }
     },
     "appId": null,
@@ -605,7 +605,7 @@
   },
   "package": {
     "individually": true,
-    "artifactDirectoryName": "serverless/auth-service/dev/1757400605038-2025-09-09T06:50:05.038Z",
+    "artifactDirectoryName": "serverless/auth-service/dev/1757414748751-2025-09-09T10:45:48.751Z",
     "artifact": ""
   }
 }
