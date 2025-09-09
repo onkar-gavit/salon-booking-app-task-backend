@@ -4,6 +4,7 @@ import { loginUser } from "../service/loginUser.service";
 import { formatResponse } from "../utils/responseFormat";
 import { handleError } from "../utils/errors";
 import { validateRequest } from "../../../../../libs/middleware/validateRequest.middleware";
+import { idempotencyMiddleware } from "../../../../../libs/middleware/idempotencyMiddleware";
 import middy from "@middy/core";
 import { APIGatewayProxyEvent } from "aws-lambda";
 
@@ -34,4 +35,5 @@ const baseHandler = async (
 
 // Wrap with Middy + middlewares
 export const loginHandler = middy(baseHandler)
-  .use(validateRequest(loginSchema)); // reusable schema validation
+  .use(validateRequest(loginSchema)) // reusable schema validation
+  .use(idempotencyMiddleware()); // idempotency support for POST endpoint
