@@ -125,7 +125,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
-          "S3Key": "serverless/customer-service/dev/1757422500471-2025-09-09T12:55:00.471Z/createCustomer.zip"
+          "S3Key": "serverless/customer-service/dev/1757426111016-2025-09-09T13:55:11.016Z/createCustomer.zip"
         },
         "Handler": "src/handlers/createCustomerHandler.handler",
         "Runtime": "nodejs18.x",
@@ -157,7 +157,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
-          "S3Key": "serverless/customer-service/dev/1757422500471-2025-09-09T12:55:00.471Z/upsertCustomer.zip"
+          "S3Key": "serverless/customer-service/dev/1757426111016-2025-09-09T13:55:11.016Z/upsertCustomer.zip"
         },
         "Handler": "src/handlers/upsertCustomerHandler.handler",
         "Runtime": "nodejs18.x",
@@ -184,24 +184,24 @@
         "UpsertCustomerLogGroup"
       ]
     },
-    "CreateCustomerLambdaVersionFLXAP5XP3wLvTkk77ywMBY7bNCR9jPHXfBPXidHrI": {
+    "CreateCustomerLambdaVersionn4JPHn2Qy50jlV5SDbt6k4qxvPmCpXTFODS1bHU": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "CreateCustomerLambdaFunction"
         },
-        "CodeSha256": "Xyt+mxMN3YcjH9pF67XTvjhm+7dIcpRb0hEI7sZFMkc="
+        "CodeSha256": "Mm2FPVKhvaOrwqFuUIq5k6Za+1YydHzp8YT1LK8oTjA="
       }
     },
-    "UpsertCustomerLambdaVersionQnP4Vu2nMh6cWkBuPKXLetrloOTQ06uKQkaxye1t98": {
+    "UpsertCustomerLambdaVersionTkSNtiGZ0ATO1ZwHze5aM0XdnFY1amiVLtTGotuE": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "UpsertCustomerLambdaFunction"
         },
-        "CodeSha256": "ZYp6iRMw++YTfKnG37sfPZ5SEhNtfYaGnvCHMeEcvcw="
+        "CodeSha256": "dfaMwTDsALW6w9EO5kz0txOex6m5lKebNTZMzVf6dnk="
       }
     },
     "ApiGatewayRestApi": {
@@ -425,7 +425,7 @@
         "UpsertCustomerLambdaPermissionApiGateway"
       ]
     },
-    "ApiGatewayDeployment1757422408358": {
+    "ApiGatewayDeployment1757426039296": {
       "Type": "AWS::ApiGateway::Deployment",
       "Properties": {
         "RestApiId": {
@@ -525,7 +525,7 @@
     "CreateCustomerLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "CreateCustomerLambdaVersionFLXAP5XP3wLvTkk77ywMBY7bNCR9jPHXfBPXidHrI"
+        "Ref": "CreateCustomerLambdaVersionn4JPHn2Qy50jlV5SDbt6k4qxvPmCpXTFODS1bHU"
       },
       "Export": {
         "Name": "sls-customer-service-dev-CreateCustomerLambdaFunctionQualifiedArn"
@@ -534,7 +534,7 @@
     "UpsertCustomerLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "UpsertCustomerLambdaVersionQnP4Vu2nMh6cWkBuPKXLetrloOTQ06uKQkaxye1t98"
+        "Ref": "UpsertCustomerLambdaVersionTkSNtiGZ0ATO1ZwHze5aM0XdnFY1amiVLtTGotuE"
       },
       "Export": {
         "Name": "sls-customer-service-dev-UpsertCustomerLambdaFunctionQualifiedArn"

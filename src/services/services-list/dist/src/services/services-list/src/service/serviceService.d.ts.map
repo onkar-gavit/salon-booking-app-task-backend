@@ -1,0 +1,1 @@
+{"version":3,"file":"serviceService.d.ts","sourceRoot":"","sources":["../../../../../../src/service/serviceService.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,eAAe,EAAE,MAAM,0BAA0B,CAAC;AAY3D,qBAAa,cAAc;IACnB,WAAW,CAAC,UAAU,EAAE,MAAM,GAAG,OAAO,CAAC,eAAe,EAAE,CAAC;CAmClE"}

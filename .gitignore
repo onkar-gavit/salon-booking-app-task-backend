@@ -1,8 +1,8 @@
 .env.*
-node_modules
 coverage
 serverless-id.json
 serverless-offline.log
 yarn.lock
 package-lock.json
 yarn-error.log
+node_modules

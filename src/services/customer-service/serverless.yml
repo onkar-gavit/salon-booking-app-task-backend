@@ -4,8 +4,8 @@ provider:
   name: aws
   runtime: nodejs18.x
   region: ${env:CUSTOM_AWS_REGION}
-  # httpApi:
-  #   id: ${file(serverless-id.json):http_api_id}  
+  httpApi:
+    id: ${file(serverless-id.json):http_api_id}  
   environment:
     DATABASE_URL: ${env:DATABASE_URL}
     FIREBASE_SECRET_NAME: ${env:FIREBASE_SECRET_NAME}
@@ -40,7 +40,7 @@ functions:
   createCustomer:
     handler: src/handlers/createCustomerHandler.handler
     events:
-      - http:
+      - httpApi:
           path: /customers
           method: post
           cors: true
@@ -48,7 +48,7 @@ functions:
   upsertCustomer:
     handler: src/handlers/upsertCustomerHandler.handler
     events:
-      - http:
+      - httpApi:
           path: /customers/upsert
           method: post
           cors: true

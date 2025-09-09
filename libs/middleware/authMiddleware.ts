@@ -38,5 +38,3 @@ export const authMiddleware = () => {
 
   return { before };
 };
-
-export type { AuthenticatedEvent };

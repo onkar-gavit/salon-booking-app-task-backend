@@ -1,7 +1,7 @@
 generator client {
   provider = "prisma-client-js"
-  binaryTargets = ["native", "rhel-openssl-1.0.x"]
-  output   = "../libs/generated/client"      // because we are using laetest ORM version there's output should be use for client generate
+  binaryTargets = ["native", "rhel-openssl-1.0.x", "rhel-openssl-3.0.x"]
+  output   = "../libs/generated/client"
 }
 
 datasource db {
@@ -28,4 +28,18 @@ model Customer {
   updatedAt   DateTime @updatedAt
 
   @@unique([businessId, phone], name: "unique_phone_per_business")
+}
+
+model Service {
+  id          String   @id @default(uuid())
+  businessId  String   // Business identifier from JWT token
+  name        String
+  description String?
+  duration    Int      // Duration in minutes
+  price       Decimal  @db.Decimal(10, 2)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([businessId])
 }

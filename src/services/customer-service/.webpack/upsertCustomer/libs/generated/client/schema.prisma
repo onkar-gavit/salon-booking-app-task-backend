@@ -29,3 +29,17 @@ model Customer {
 
   @@unique([businessId, phone], name: "unique_phone_per_business")
 }
+
+model Service {
+  id          String   @id @default(uuid())
+  businessId  String // Business identifier from JWT token
+  name        String
+  description String?
+  duration    Int // Duration in minutes
+  price       Decimal  @db.Decimal(10, 2)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([businessId])
+}

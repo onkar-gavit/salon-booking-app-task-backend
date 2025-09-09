@@ -1,0 +1,5 @@
+{
+  "http_api_id": "your-api-gateway-id-here",
+  "stage": "dev",
+  "region": "ap-south-1"
+}
