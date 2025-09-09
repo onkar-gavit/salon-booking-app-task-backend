@@ -9,13 +9,12 @@ const registerUser_service_1 = require("../service/registerUser.service");
 const responseFormat_1 = require("../utils/responseFormat");
 const errors_1 = require("../utils/errors");
 const authMiddleware_1 = require("../../../../../libs/middleware/authMiddleware");
-const idempotencyMiddleware_1 = require("../../../../../libs/middleware/idempotencyMiddleware");
 const validateRequest_middleware_1 = require("../../../../../libs/middleware/validateRequest.middleware");
 const core_1 = __importDefault(require("@middy/core"));
 const baseHandler = async (event) => {
     try {
         const { uid } = event.user;
-        const parsed = event.body;
+        const parsed = JSON.parse(event.body || '{}');
         const user = await (0, registerUser_service_1.registerUser)({
             ...parsed,
             uid,
@@ -32,6 +31,5 @@ const baseHandler = async (event) => {
 };
 exports.registerHandler = (0, core_1.default)(baseHandler)
     .use((0, authMiddleware_1.authMiddleware)())
-    .use((0, validateRequest_middleware_1.validateRequest)(registerSchema_1.registerSchema))
-    .use((0, idempotencyMiddleware_1.idempotencyMiddleware)());
+    .use((0, validateRequest_middleware_1.validateRequest)(registerSchema_1.registerSchema));
 //# sourceMappingURL=registerUserHandler.js.map

@@ -12,7 +12,8 @@
         "environment": {
           "FIREBASE_SECRET_NAME": "<REDACTED>",
           "CUSTOM_AWS_REGION": "ap-south-1",
-          "DATABASE_URL": "postgresql://backendapp:backend123@salonapp.cheme8w42ux8.ap-south-1.rds.amazonaws.com/salondb"
+          "DATABASE_URL": "postgresql://backendapp:backend123@salonapp.cheme8w42ux8.ap-south-1.rds.amazonaws.com/salondb",
+          "FIREBASE_WEB_API_KEY": "<REDACTED>"
         },
         "stage": "dev",
         "versionFunctions": true,
@@ -24,6 +25,12 @@
               "Type": "AWS::Logs::LogGroup",
               "Properties": {
                 "LogGroupName": "/aws/lambda/auth-service-dev-register"
+              }
+            },
+            "LoginLogGroup": {
+              "Type": "AWS::Logs::LogGroup",
+              "Properties": {
+                "LogGroupName": "/aws/lambda/auth-service-dev-login"
               }
             },
             "IamRoleLambdaExecution": {
@@ -109,7 +116,7 @@
               "Properties": {
                 "Code": {
                   "S3Bucket": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
-                  "S3Key": "serverless/auth-service/dev/1757335790319-2025-09-08T12:49:50.319Z/auth-service-register.zip"
+                  "S3Key": "serverless/auth-service/dev/1757399145492-2025-09-09T06:25:45.492Z/auth-service-register.zip"
                 },
                 "Handler": "src/handlers/registerUserHandler.registerHandler",
                 "Runtime": "nodejs18.x",
@@ -121,6 +128,7 @@
                     "FIREBASE_SECRET_NAME": "<REDACTED>",
                     "CUSTOM_AWS_REGION": "ap-south-1",
                     "DATABASE_URL": "postgresql://backendapp:backend123@salonapp.cheme8w42ux8.ap-south-1.rds.amazonaws.com/salondb",
+                    "FIREBASE_WEB_API_KEY": "<REDACTED>",
                     "NODE_OPTIONS": "--enable-source-maps"
                   }
                 },
@@ -135,14 +143,56 @@
                 "RegisterLogGroup"
               ]
             },
-            "RegisterLambdaVersiondikOdzoC43PiPy2q8fFRRIzAQ17GMwpozWUAsyJxPs": {
+            "LoginLambdaFunction": {
+              "Type": "AWS::Lambda::Function",
+              "Properties": {
+                "Code": {
+                  "S3Bucket": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
+                  "S3Key": "serverless/auth-service/dev/1757399145492-2025-09-09T06:25:45.492Z/auth-service-login.zip"
+                },
+                "Handler": "src/handlers/loginHandler.loginHandler",
+                "Runtime": "nodejs18.x",
+                "FunctionName": "auth-service-dev-login",
+                "MemorySize": 1024,
+                "Timeout": 6,
+                "Environment": {
+                  "Variables": {
+                    "FIREBASE_SECRET_NAME": "<REDACTED>",
+                    "CUSTOM_AWS_REGION": "ap-south-1",
+                    "DATABASE_URL": "postgresql://backendapp:backend123@salonapp.cheme8w42ux8.ap-south-1.rds.amazonaws.com/salondb",
+                    "FIREBASE_WEB_API_KEY": "<REDACTED>",
+                    "NODE_OPTIONS": "--enable-source-maps"
+                  }
+                },
+                "Role": {
+                  "Fn::GetAtt": [
+                    "IamRoleLambdaExecution",
+                    "Arn"
+                  ]
+                }
+              },
+              "DependsOn": [
+                "LoginLogGroup"
+              ]
+            },
+            "RegisterLambdaVersiondqmgFeYZdiUgvwSr87wxHg8Cn0qdsPK8jlQZj2Oc": {
               "Type": "AWS::Lambda::Version",
               "DeletionPolicy": "Retain",
               "Properties": {
                 "FunctionName": {
                   "Ref": "RegisterLambdaFunction"
                 },
-                "CodeSha256": "smH/7jDf3f/spVhvxzwLH2UpslktTsadCX6hvAQi1UU="
+                "CodeSha256": "6c+syW+yt2TB6+ZfCFrPLNQfBC2cvbv54J4jJOKf7qM="
+              }
+            },
+            "LoginLambdaVersionqp3wrJ3CXItyxgvof79mOq7p20F8IcFWXgqgO9FQDU": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "LoginLambdaFunction"
+                },
+                "CodeSha256": "NTMJSDVL49iZ9NO7OiDCZuSWE2xvJd9BByUXV2Gj7d0="
               }
             },
             "HttpApi": {
@@ -240,6 +290,81 @@
               },
               "DependsOn": "HttpApiIntegrationRegister"
             },
+            "LoginLambdaPermissionHttpApi": {
+              "Type": "AWS::Lambda::Permission",
+              "Properties": {
+                "FunctionName": {
+                  "Fn::GetAtt": [
+                    "LoginLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":execute-api:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":",
+                      {
+                        "Ref": "HttpApi"
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              }
+            },
+            "HttpApiIntegrationLogin": {
+              "Type": "AWS::ApiGatewayV2::Integration",
+              "Properties": {
+                "ApiId": {
+                  "Ref": "HttpApi"
+                },
+                "IntegrationType": "AWS_PROXY",
+                "IntegrationUri": {
+                  "Fn::GetAtt": [
+                    "LoginLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "PayloadFormatVersion": "2.0",
+                "TimeoutInMillis": 30000
+              }
+            },
+            "HttpApiRoutePostAuthLogin": {
+              "Type": "AWS::ApiGatewayV2::Route",
+              "Properties": {
+                "ApiId": {
+                  "Ref": "HttpApi"
+                },
+                "RouteKey": "POST /auth/login",
+                "Target": {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      "integrations",
+                      {
+                        "Ref": "HttpApiIntegrationLogin"
+                      }
+                    ]
+                  ]
+                }
+              },
+              "DependsOn": "HttpApiIntegrationLogin"
+            },
             "IdempotencyTable": {
               "Type": "AWS::DynamoDB::Table",
               "Properties": {
@@ -274,10 +399,19 @@
             "RegisterLambdaFunctionQualifiedArn": {
               "Description": "Current Lambda function version",
               "Value": {
-                "Ref": "RegisterLambdaVersiondikOdzoC43PiPy2q8fFRRIzAQ17GMwpozWUAsyJxPs"
+                "Ref": "RegisterLambdaVersiondqmgFeYZdiUgvwSr87wxHg8Cn0qdsPK8jlQZj2Oc"
               },
               "Export": {
                 "Name": "sls-auth-service-dev-RegisterLambdaFunctionQualifiedArn"
+              }
+            },
+            "LoginLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "LoginLambdaVersionqp3wrJ3CXItyxgvof79mOq7p20F8IcFWXgqgO9FQDU"
+              },
+              "Export": {
+                "Name": "sls-auth-service-dev-LoginLambdaFunctionQualifiedArn"
               }
             },
             "HttpApiId": {
@@ -376,7 +510,32 @@
           "timeout": 6,
           "runtime": "nodejs18.x",
           "vpc": {},
-          "versionLogicalId": "RegisterLambdaVersiondikOdzoC43PiPy2q8fFRRIzAQ17GMwpozWUAsyJxPs"
+          "versionLogicalId": "RegisterLambdaVersiondqmgFeYZdiUgvwSr87wxHg8Cn0qdsPK8jlQZj2Oc"
+        },
+        "login": {
+          "handler": "src/handlers/loginHandler.loginHandler",
+          "events": [
+            {
+              "httpApi": {
+                "path": "/auth/login",
+                "method": "post"
+              },
+              "resolvedMethod": "POST",
+              "resolvedPath": "/auth/login"
+            }
+          ],
+          "name": "auth-service-dev-login",
+          "environment": {
+            "NODE_OPTIONS": "--enable-source-maps"
+          },
+          "package": {
+            "artifact": "C:\\Users\\Asus\\Desktop\\Assignment project\\salon-app-Backend\\src\\services\\auth-service\\.serverless\\build\\auth-service-login.zip"
+          },
+          "memory": 1024,
+          "timeout": 6,
+          "runtime": "nodejs18.x",
+          "vpc": {},
+          "versionLogicalId": "LoginLambdaVersionqp3wrJ3CXItyxgvof79mOq7p20F8IcFWXgqgO9FQDU"
         }
       },
       "resources": {
@@ -427,7 +586,7 @@
         ],
         "artifactsS3KeyDirname": "serverless/auth-service/dev/code-artifacts",
         "deploymentBucket": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
-        "artifactDirectoryName": "serverless/auth-service/dev/1757335790319-2025-09-08T12:49:50.319Z"
+        "artifactDirectoryName": "serverless/auth-service/dev/1757399145492-2025-09-09T06:25:45.492Z"
       }
     },
     "provider": {
@@ -437,7 +596,8 @@
       "environment": {
         "FIREBASE_SECRET_NAME": "<REDACTED>",
         "CUSTOM_AWS_REGION": "ap-south-1",
-        "DATABASE_URL": "postgresql://backendapp:backend123@salonapp.cheme8w42ux8.ap-south-1.rds.amazonaws.com/salondb"
+        "DATABASE_URL": "postgresql://backendapp:backend123@salonapp.cheme8w42ux8.ap-south-1.rds.amazonaws.com/salondb",
+        "FIREBASE_WEB_API_KEY": "<REDACTED>"
       },
       "stage": "dev",
       "versionFunctions": true,
@@ -449,6 +609,12 @@
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
               "LogGroupName": "/aws/lambda/auth-service-dev-register"
+            }
+          },
+          "LoginLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/auth-service-dev-login"
             }
           },
           "IamRoleLambdaExecution": {
@@ -534,7 +700,7 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
-                "S3Key": "serverless/auth-service/dev/1757335790319-2025-09-08T12:49:50.319Z/auth-service-register.zip"
+                "S3Key": "serverless/auth-service/dev/1757399145492-2025-09-09T06:25:45.492Z/auth-service-register.zip"
               },
               "Handler": "src/handlers/registerUserHandler.registerHandler",
               "Runtime": "nodejs18.x",
@@ -546,6 +712,7 @@
                   "FIREBASE_SECRET_NAME": "<REDACTED>",
                   "CUSTOM_AWS_REGION": "ap-south-1",
                   "DATABASE_URL": "postgresql://backendapp:backend123@salonapp.cheme8w42ux8.ap-south-1.rds.amazonaws.com/salondb",
+                  "FIREBASE_WEB_API_KEY": "<REDACTED>",
                   "NODE_OPTIONS": "--enable-source-maps"
                 }
               },
@@ -560,14 +727,56 @@
               "RegisterLogGroup"
             ]
           },
-          "RegisterLambdaVersiondikOdzoC43PiPy2q8fFRRIzAQ17GMwpozWUAsyJxPs": {
+          "LoginLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
+                "S3Key": "serverless/auth-service/dev/1757399145492-2025-09-09T06:25:45.492Z/auth-service-login.zip"
+              },
+              "Handler": "src/handlers/loginHandler.loginHandler",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "auth-service-dev-login",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "FIREBASE_SECRET_NAME": "<REDACTED>",
+                  "CUSTOM_AWS_REGION": "ap-south-1",
+                  "DATABASE_URL": "postgresql://backendapp:backend123@salonapp.cheme8w42ux8.ap-south-1.rds.amazonaws.com/salondb",
+                  "FIREBASE_WEB_API_KEY": "<REDACTED>",
+                  "NODE_OPTIONS": "--enable-source-maps"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "LoginLogGroup"
+            ]
+          },
+          "RegisterLambdaVersiondqmgFeYZdiUgvwSr87wxHg8Cn0qdsPK8jlQZj2Oc": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "RegisterLambdaFunction"
               },
-              "CodeSha256": "smH/7jDf3f/spVhvxzwLH2UpslktTsadCX6hvAQi1UU="
+              "CodeSha256": "6c+syW+yt2TB6+ZfCFrPLNQfBC2cvbv54J4jJOKf7qM="
+            }
+          },
+          "LoginLambdaVersionqp3wrJ3CXItyxgvof79mOq7p20F8IcFWXgqgO9FQDU": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "LoginLambdaFunction"
+              },
+              "CodeSha256": "NTMJSDVL49iZ9NO7OiDCZuSWE2xvJd9BByUXV2Gj7d0="
             }
           },
           "HttpApi": {
@@ -665,6 +874,81 @@
             },
             "DependsOn": "HttpApiIntegrationRegister"
           },
+          "LoginLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "LoginLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationLogin": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "Fn::GetAtt": [
+                  "LoginLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRoutePostAuthLogin": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "POST /auth/login",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationLogin"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationLogin"
+          },
           "IdempotencyTable": {
             "Type": "AWS::DynamoDB::Table",
             "Properties": {
@@ -699,10 +983,19 @@
           "RegisterLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "RegisterLambdaVersiondikOdzoC43PiPy2q8fFRRIzAQ17GMwpozWUAsyJxPs"
+              "Ref": "RegisterLambdaVersiondqmgFeYZdiUgvwSr87wxHg8Cn0qdsPK8jlQZj2Oc"
             },
             "Export": {
               "Name": "sls-auth-service-dev-RegisterLambdaFunctionQualifiedArn"
+            }
+          },
+          "LoginLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "LoginLambdaVersionqp3wrJ3CXItyxgvof79mOq7p20F8IcFWXgqgO9FQDU"
+            },
+            "Export": {
+              "Name": "sls-auth-service-dev-LoginLambdaFunctionQualifiedArn"
             }
           },
           "HttpApiId": {
@@ -752,7 +1045,7 @@
       "serviceProvider": null,
       "instanceParameters": null
     },
-    "serviceRawFile": "service: auth-service\n\nprovider:\n  name: aws\n  runtime: nodejs18.x\n  region: ${env:CUSTOM_AWS_REGION}\n  # httpApi:\n  #   id: ${file(serverless-id.json):http_api_id}  \n  environment:\n    FIREBASE_SECRET_NAME: ${env:FIREBASE_SECRET_NAME}\n    CUSTOM_AWS_REGION: ${env:CUSTOM_AWS_REGION}\n    DATABASE_URL: ${env:DATABASE_URL}\n    # LOG_LEVEL: ${env:LOG_LEVEL, 'info'}\n\niam:\n    role:\n      statements:\n        - Effect: Allow\n          Action:\n            - ssm:GetParameter\n            - ssm:GetParameters\n          Resource:\n            - Fn::Sub: arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${env:FIREBASE_SECRET_NAME}\n        - Effect: Allow\n          Action:\n            - dynamodb:GetItem\n            - dynamodb:PutItem\n            - dynamodb:UpdateItem\n            - dynamodb:DeleteItem\n            - dynamodb:Query\n            - dynamodb:Scan\n          Resource:\n            - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/IdempotencyTable\n\nfunctions:\n  register:\n    handler:  src/handlers/registerUserHandler.registerHandler\n    events:\n      - httpApi:\n          path: /auth/register\n          method: post\n\nresources:\n  Resources:\n    IdempotencyTable:\n      Type: AWS::DynamoDB::Table\n      Properties:\n        TableName: IdempotencyTable\n        AttributeDefinitions:\n          - AttributeName: id\n            AttributeType: S\n        KeySchema:\n          - AttributeName: id\n            KeyType: HASH\n        BillingMode: PAY_PER_REQUEST\n        TimeToLiveSpecification:\n          AttributeName: ttl\n          Enabled: true\n\nplugins:\n  - serverless-offline\n  - serverless-dotenv-plugin\n\npackage:\n  individually: true\n  patterns:\n    - '!tests/**'\n    - '!coverage/**'\n    - '!.env**'\n    - '!**/*.spec.ts'\n    - '!package.json'\n    - '!src/**'\n    - 'dist/**'\n    - '../../../libs/generated/client/**'\n    - '../../../node_modules/@prisma/client/**'\n    - '../../../node_modules/.prisma/client/**'",
+    "serviceRawFile": "service: auth-service\n\nprovider:\n  name: aws\n  runtime: nodejs18.x\n  region: ${env:CUSTOM_AWS_REGION}\n  # httpApi:\n  #   id: ${file(serverless-id.json):http_api_id}  \n  environment:\n    FIREBASE_SECRET_NAME: ${env:FIREBASE_SECRET_NAME}\n    CUSTOM_AWS_REGION: ${env:CUSTOM_AWS_REGION}\n    DATABASE_URL: ${env:DATABASE_URL}\n    FIREBASE_WEB_API_KEY: ${env:FIREBASE_WEB_API_KEY}\n    # LOG_LEVEL: ${env:LOG_LEVEL, 'info'}\n\niam:\n    role:\n      statements:\n        - Effect: Allow\n          Action:\n            - ssm:GetParameter\n            - ssm:GetParameters\n          Resource:\n            - Fn::Sub: arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${env:FIREBASE_SECRET_NAME}\n        - Effect: Allow\n          Action:\n            - dynamodb:GetItem\n            - dynamodb:PutItem\n            - dynamodb:UpdateItem\n            - dynamodb:DeleteItem\n            - dynamodb:Query\n            - dynamodb:Scan\n          Resource:\n            - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/IdempotencyTable\n\nfunctions:\n  register:\n    handler:  src/handlers/registerUserHandler.registerHandler\n    events:\n      - httpApi:\n          path: /auth/register\n          method: post\n  \n  login:\n    handler: src/handlers/loginHandler.loginHandler\n    events:\n      - httpApi:\n          path: /auth/login\n          method: post\n\nresources:\n  Resources:\n    IdempotencyTable:\n      Type: AWS::DynamoDB::Table\n      Properties:\n        TableName: IdempotencyTable\n        AttributeDefinitions:\n          - AttributeName: id\n            AttributeType: S\n        KeySchema:\n          - AttributeName: id\n            KeyType: HASH\n        BillingMode: PAY_PER_REQUEST\n        TimeToLiveSpecification:\n          AttributeName: ttl\n          Enabled: true\n\nplugins:\n  - serverless-offline\n  - serverless-dotenv-plugin\n\npackage:\n  individually: true\n  patterns:\n    - '!tests/**'\n    - '!coverage/**'\n    - '!.env**'\n    - '!**/*.spec.ts'\n    - '!package.json'\n    - '!src/**'\n    - 'dist/**'\n    - '../../../libs/generated/client/**'\n    - '../../../node_modules/@prisma/client/**'\n    - '../../../node_modules/.prisma/client/**'",
     "command": [
       "deploy"
     ],
@@ -765,12 +1058,12 @@
     "serviceProviderAwsCfStackName": "auth-service-dev",
     "serviceProviderAwsCfStackId": "arn:aws:cloudformation:ap-south-1:269578498075:stack/auth-service-dev/fd1d3420-8a7d-11f0-a839-029809a382ed",
     "serviceProviderAwsCfStackCreated": "2025-09-05T17:30:17.777Z",
-    "serviceProviderAwsCfStackUpdated": "2025-09-08T12:39:14.972Z",
+    "serviceProviderAwsCfStackUpdated": "2025-09-09T05:52:16.621Z",
     "serviceProviderAwsCfStackStatus": "UPDATE_COMPLETE",
     "serviceProviderAwsCfStackOutputs": [
       {
         "OutputKey": "RegisterLambdaFunctionQualifiedArn",
-        "OutputValue": "arn:aws:lambda:ap-south-1:269578498075:function:auth-service-dev-register:32",
+        "OutputValue": "arn:aws:lambda:ap-south-1:269578498075:function:auth-service-dev-register:35",
         "Description": "Current Lambda function version",
         "ExportName": "sls-auth-service-dev-RegisterLambdaFunctionQualifiedArn"
       },
@@ -779,6 +1072,12 @@
         "OutputValue": "fxh1zg6455",
         "Description": "Id of the HTTP API",
         "ExportName": "sls-auth-service-dev-HttpApiId"
+      },
+      {
+        "OutputKey": "LoginLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:ap-south-1:269578498075:function:auth-service-dev-login:2",
+        "Description": "Current Lambda function version",
+        "ExportName": "sls-auth-service-dev-LoginLambdaFunctionQualifiedArn"
       },
       {
         "OutputKey": "ServerlessDeploymentBucketName",
@@ -800,6 +1099,12 @@
           "Type": "AWS::Logs::LogGroup",
           "Properties": {
             "LogGroupName": "/aws/lambda/auth-service-dev-register"
+          }
+        },
+        "LoginLogGroup": {
+          "Type": "AWS::Logs::LogGroup",
+          "Properties": {
+            "LogGroupName": "/aws/lambda/auth-service-dev-login"
           }
         },
         "IamRoleLambdaExecution": {
@@ -885,7 +1190,7 @@
           "Properties": {
             "Code": {
               "S3Bucket": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
-              "S3Key": "serverless/auth-service/dev/1757335790319-2025-09-08T12:49:50.319Z/auth-service-register.zip"
+              "S3Key": "serverless/auth-service/dev/1757399145492-2025-09-09T06:25:45.492Z/auth-service-register.zip"
             },
             "Handler": "src/handlers/registerUserHandler.registerHandler",
             "Runtime": "nodejs18.x",
@@ -897,6 +1202,7 @@
                 "FIREBASE_SECRET_NAME": "<REDACTED>",
                 "CUSTOM_AWS_REGION": "ap-south-1",
                 "DATABASE_URL": "postgresql://backendapp:backend123@salonapp.cheme8w42ux8.ap-south-1.rds.amazonaws.com/salondb",
+                "FIREBASE_WEB_API_KEY": "<REDACTED>",
                 "NODE_OPTIONS": "--enable-source-maps"
               }
             },
@@ -911,14 +1217,56 @@
             "RegisterLogGroup"
           ]
         },
-        "RegisterLambdaVersiondikOdzoC43PiPy2q8fFRRIzAQ17GMwpozWUAsyJxPs": {
+        "LoginLambdaFunction": {
+          "Type": "AWS::Lambda::Function",
+          "Properties": {
+            "Code": {
+              "S3Bucket": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
+              "S3Key": "serverless/auth-service/dev/1757399145492-2025-09-09T06:25:45.492Z/auth-service-login.zip"
+            },
+            "Handler": "src/handlers/loginHandler.loginHandler",
+            "Runtime": "nodejs18.x",
+            "FunctionName": "auth-service-dev-login",
+            "MemorySize": 1024,
+            "Timeout": 6,
+            "Environment": {
+              "Variables": {
+                "FIREBASE_SECRET_NAME": "<REDACTED>",
+                "CUSTOM_AWS_REGION": "ap-south-1",
+                "DATABASE_URL": "postgresql://backendapp:backend123@salonapp.cheme8w42ux8.ap-south-1.rds.amazonaws.com/salondb",
+                "FIREBASE_WEB_API_KEY": "<REDACTED>",
+                "NODE_OPTIONS": "--enable-source-maps"
+              }
+            },
+            "Role": {
+              "Fn::GetAtt": [
+                "IamRoleLambdaExecution",
+                "Arn"
+              ]
+            }
+          },
+          "DependsOn": [
+            "LoginLogGroup"
+          ]
+        },
+        "RegisterLambdaVersiondqmgFeYZdiUgvwSr87wxHg8Cn0qdsPK8jlQZj2Oc": {
           "Type": "AWS::Lambda::Version",
           "DeletionPolicy": "Retain",
           "Properties": {
             "FunctionName": {
               "Ref": "RegisterLambdaFunction"
             },
-            "CodeSha256": "smH/7jDf3f/spVhvxzwLH2UpslktTsadCX6hvAQi1UU="
+            "CodeSha256": "6c+syW+yt2TB6+ZfCFrPLNQfBC2cvbv54J4jJOKf7qM="
+          }
+        },
+        "LoginLambdaVersionqp3wrJ3CXItyxgvof79mOq7p20F8IcFWXgqgO9FQDU": {
+          "Type": "AWS::Lambda::Version",
+          "DeletionPolicy": "Retain",
+          "Properties": {
+            "FunctionName": {
+              "Ref": "LoginLambdaFunction"
+            },
+            "CodeSha256": "NTMJSDVL49iZ9NO7OiDCZuSWE2xvJd9BByUXV2Gj7d0="
           }
         },
         "HttpApi": {
@@ -1016,6 +1364,81 @@
           },
           "DependsOn": "HttpApiIntegrationRegister"
         },
+        "LoginLambdaPermissionHttpApi": {
+          "Type": "AWS::Lambda::Permission",
+          "Properties": {
+            "FunctionName": {
+              "Fn::GetAtt": [
+                "LoginLambdaFunction",
+                "Arn"
+              ]
+            },
+            "Action": "lambda:InvokeFunction",
+            "Principal": "apigateway.amazonaws.com",
+            "SourceArn": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:",
+                  {
+                    "Ref": "AWS::Partition"
+                  },
+                  ":execute-api:",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId"
+                  },
+                  ":",
+                  {
+                    "Ref": "HttpApi"
+                  },
+                  "/*"
+                ]
+              ]
+            }
+          }
+        },
+        "HttpApiIntegrationLogin": {
+          "Type": "AWS::ApiGatewayV2::Integration",
+          "Properties": {
+            "ApiId": {
+              "Ref": "HttpApi"
+            },
+            "IntegrationType": "AWS_PROXY",
+            "IntegrationUri": {
+              "Fn::GetAtt": [
+                "LoginLambdaFunction",
+                "Arn"
+              ]
+            },
+            "PayloadFormatVersion": "2.0",
+            "TimeoutInMillis": 30000
+          }
+        },
+        "HttpApiRoutePostAuthLogin": {
+          "Type": "AWS::ApiGatewayV2::Route",
+          "Properties": {
+            "ApiId": {
+              "Ref": "HttpApi"
+            },
+            "RouteKey": "POST /auth/login",
+            "Target": {
+              "Fn::Join": [
+                "/",
+                [
+                  "integrations",
+                  {
+                    "Ref": "HttpApiIntegrationLogin"
+                  }
+                ]
+              ]
+            }
+          },
+          "DependsOn": "HttpApiIntegrationLogin"
+        },
         "IdempotencyTable": {
           "Type": "AWS::DynamoDB::Table",
           "Properties": {
@@ -1050,10 +1473,19 @@
         "RegisterLambdaFunctionQualifiedArn": {
           "Description": "Current Lambda function version",
           "Value": {
-            "Ref": "RegisterLambdaVersiondikOdzoC43PiPy2q8fFRRIzAQ17GMwpozWUAsyJxPs"
+            "Ref": "RegisterLambdaVersiondqmgFeYZdiUgvwSr87wxHg8Cn0qdsPK8jlQZj2Oc"
           },
           "Export": {
             "Name": "sls-auth-service-dev-RegisterLambdaFunctionQualifiedArn"
+          }
+        },
+        "LoginLambdaFunctionQualifiedArn": {
+          "Description": "Current Lambda function version",
+          "Value": {
+            "Ref": "LoginLambdaVersionqp3wrJ3CXItyxgvof79mOq7p20F8IcFWXgqgO9FQDU"
+          },
+          "Export": {
+            "Name": "sls-auth-service-dev-LoginLambdaFunctionQualifiedArn"
           }
         },
         "HttpApiId": {

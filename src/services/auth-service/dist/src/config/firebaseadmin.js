@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.admin = exports.verifyFirebaseToken = exports.initializeFirebaseAdmin = void 0;
+exports.admin = exports.createCustomToken = exports.signInWithPassword = exports.verifyFirebaseToken = exports.initializeFirebaseAdmin = void 0;
 const admin = __importStar(require("firebase-admin"));
 exports.admin = admin;
 const client_ssm_1 = require("@aws-sdk/client-ssm");
@@ -80,4 +80,53 @@ const verifyFirebaseToken = async (idToken) => {
     return admin.auth(app).verifyIdToken(idToken);
 };
 exports.verifyFirebaseToken = verifyFirebaseToken;
+const signInWithPassword = async (email, password) => {
+    var _a, _b;
+    try {
+        const webApiKeyResponse = await ssmClient.send(new client_ssm_1.GetParameterCommand({
+            Name: process.env.FIREBASE_WEB_API_KEY || '/firebase/web-api-key',
+            WithDecryption: true,
+        }));
+        if (!((_a = webApiKeyResponse.Parameter) === null || _a === void 0 ? void 0 : _a.Value)) {
+            throw new Error('Firebase Web API Key not found in SSM parameter store');
+        }
+        const webApiKey = webApiKeyResponse.Parameter.Value;
+        const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${webApiKey}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email,
+                password,
+                returnSecureToken: true,
+            }),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(((_b = data.error) === null || _b === void 0 ? void 0 : _b.message) || 'Authentication failed');
+        }
+        return {
+            localId: data.localId,
+            email: data.email,
+            idToken: data.idToken,
+            refreshToken: data.refreshToken,
+            expiresIn: data.expiresIn,
+        };
+    }
+    catch (error) {
+        logger_1.logger.error('Firebase sign in failed', {
+            error: error.message,
+            email,
+        });
+        throw error;
+    }
+};
+exports.signInWithPassword = signInWithPassword;
+const createCustomToken = async (uid, additionalClaims) => {
+    await (0, exports.initializeFirebaseAdmin)();
+    const app = admin.app();
+    return admin.auth(app).createCustomToken(uid, additionalClaims);
+};
+exports.createCustomToken = createCustomToken;
 //# sourceMappingURL=firebaseadmin.js.map

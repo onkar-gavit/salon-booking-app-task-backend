@@ -10,6 +10,7 @@ provider:
     FIREBASE_SECRET_NAME: ${env:FIREBASE_SECRET_NAME}
     CUSTOM_AWS_REGION: ${env:CUSTOM_AWS_REGION}
     DATABASE_URL: ${env:DATABASE_URL}
+    FIREBASE_WEB_API_KEY: ${env:FIREBASE_WEB_API_KEY}
     # LOG_LEVEL: ${env:LOG_LEVEL, 'info'}
 
 iam:
@@ -38,6 +39,13 @@ functions:
     events:
       - httpApi:
           path: /auth/register
+          method: post
+  
+  login:
+    handler: src/handlers/loginHandler.loginHandler
+    events:
+      - httpApi:
+          path: /auth/login
           method: post
 
 resources:
