@@ -1,0 +1,98 @@
+service: walkin-service
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: ${env:CUSTOM_AWS_REGION}
+  httpApi:
+    id: ${file(serverless-id.json):http_api_id}
+  environment:
+    DATABASE_URL: ${env:DATABASE_URL}
+    FIREBASE_SECRET_NAME: ${env:FIREBASE_SECRET_NAME}
+    FIREBASE_WEB_API_KEY: ${env:FIREBASE_WEB_API_KEY}
+    CUSTOM_AWS_REGION: ${env:CUSTOM_AWS_REGION}
+    DYNAMODB_WALKINS_TABLE: ${env:DYNAMODB_WALKINS_TABLE}
+    PRISMA_CLI_QUERY_ENGINE_TYPE: binary
+    PRISMA_CLIENT_ENGINE_TYPE: binary
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - ssm:GetParameter
+            - ssm:GetParameters
+          Resource:
+            - Fn::Sub: arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${env:FIREBASE_SECRET_NAME}
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:Query
+            - dynamodb:Scan
+          Resource:
+            - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/IdempotencyTable
+            - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${env:DYNAMODB_WALKINS_TABLE}
+            - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${env:DYNAMODB_WALKINS_TABLE}/index/*
+            - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${env:DYNAMODB_BOOKINGS_TABLE}
+            - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${env:DYNAMODB_BOOKINGS_TABLE}/index/*
+
+useDotenv: true
+
+functions:
+  createWalkin:
+    handler: src/handlers/createWalkinHandler.handler
+    events:
+      - httpApi:
+          path: /walkins
+          method: post
+
+resources:
+  Resources:
+    WalkinsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${env:DYNAMODB_WALKINS_TABLE}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: locationId
+            AttributeType: S
+          - AttributeName: requestedTime
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: LocationTimeIndex
+            KeySchema:
+              - AttributeName: locationId
+                KeyType: HASH
+              - AttributeName: requestedTime
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
+
+plugins:
+  - serverless-webpack
+  - serverless-dotenv-plugin
+
+custom:
+  webpack:
+    webpackConfig: 'webpack.config.js'
+    includeModules: false
+    packager: 'yarn'
+    keepOutputDirectory: true
+
+package:
+  individually: true
+  patterns:
+    - '!../../../node_modules/**'
+    - '../../../libs/generated/client/**'
+    - '../../../node_modules/@prisma/client/**'
+    - '../../../node_modules/.prisma/client/**'

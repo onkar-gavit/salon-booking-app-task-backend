@@ -1,0 +1,1 @@
+{"version":3,"file":"dynamodb.d.ts","sourceRoot":"","sources":["../../../src/utils/dynamodb.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,sBAAsB,EAAwC,MAAM,uBAAuB,CAAC;AAGrG,eAAO,MAAM,SAAS,wBAAsC,CAAC;AAE7D,eAAO,MAAM,aAAa,QAAsC,CAAC;AACjE,eAAO,MAAM,cAAc,QAAuC,CAAC"}

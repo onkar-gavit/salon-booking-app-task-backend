@@ -1,0 +1,10 @@
+# Serverless ignore patterns
+.env*
+node_modules/
+src/**/*.test.ts
+src/**/*.spec.ts
+coverage/
+.nyc_output/
+*.log
+.DS_Store
+Thumbs.db

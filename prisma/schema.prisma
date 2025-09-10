@@ -10,29 +10,68 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  firebaseUid  String   @unique
-  email        String   @unique
+  id           String     @id @default(uuid())
+  firebaseUid  String     @unique
+  email        String     @unique
   name         String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  businesses   Business[]
+}
+
+model Business {
+  id          String     @id @default(uuid())
+  ownerId     String
+  name        String
+  description String?
+  phone       String?
+  email       String?
+  address     String?
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  
+  owner       User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  locations   Location[]
+  customers   Customer[]
+  services    Service[]
+
+  @@index([ownerId])
+}
+
+model Location {
+  id          String   @id @default(uuid())
+  businessId  String
+  name        String
+  address     String
+  phone       String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
 }
 
 model Customer {
   id          String   @id @default(uuid())
-  businessId  String   // Business identifier from JWT token
+  businessId  String
   phone       String
   name        String
   email       String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
   @@unique([businessId, phone], name: "unique_phone_per_business")
+  @@index([businessId])
 }
 
 model Service {
   id          String   @id @default(uuid())
-  businessId  String   // Business identifier from JWT token
+  businessId  String
   name        String
   description String?
   duration    Int      // Duration in minutes
@@ -40,6 +79,8 @@ model Service {
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   @@index([businessId])
 }

@@ -1,0 +1,1 @@
+{"version":3,"file":"walkinService.d.ts","sourceRoot":"","sources":["../../../src/service/walkinService.ts"],"names":[],"mappings":"AAGA,OAAO,EAAwB,mBAAmB,EAAE,oBAAoB,EAAE,MAAM,yBAAyB,CAAC;AAM1G,qBAAa,aAAa;IAClB,YAAY,CAAC,OAAO,EAAE,mBAAmB,EAAE,UAAU,EAAE,MAAM,GAAG,OAAO,CAAC,oBAAoB,CAAC;YA+CrF,qBAAqB;YAwCrB,0BAA0B;CA6EzC"}
