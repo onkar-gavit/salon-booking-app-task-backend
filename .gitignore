@@ -6,3 +6,24 @@ yarn.lock
 package-lock.json
 yarn-error.log
 node_modules
+
+# TypeScript build artifacts
+libs/**/*.js
+libs/**/*.d.ts
+libs/**/*.js.map
+libs/**/*.d.ts.map
+
+# Serverless Framework
+.serverless/
+
+# Prisma
+.prisma/
+
+# Jest
+/jest-junit.xml
+/coverage/
+/jest_junit.xml
+
+# TypeScript
+/dist/
+/tsconfig.tsbuildinfo

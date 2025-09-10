@@ -19,13 +19,17 @@ const baseHandler = async (
     const { uid } = event.user;
 
     // parsed body already validated by validateRequest middleware
-    const parsed = JSON.parse(event.body || '{}') as {
-      serviceId: string;
-      customerId: string;
-      locationId: string;
-      startTime: string;
-      notes?: string;
+    const validatedData = JSON.parse(event.body || '{}') as {
+      body: {
+        serviceId: string;
+        customerId: string;
+        locationId: string;
+        startTime: string;
+        notes?: string;
+      }
     };
+    
+    const parsed = validatedData.body;
 
     // Create booking
     const booking = await bookingService.createBooking(uid, parsed);

@@ -48,6 +48,20 @@ functions:
           path: /bookings
           method: post
 
+  confirmBooking:
+    handler: src/handlers/confirmBookingHandler.handler
+    events:
+      - httpApi:
+          path: /bookings/{id}/confirm
+          method: post
+
+  cancelBooking:
+    handler: src/handlers/cancelBookingHandler.handler
+    events:
+      - httpApi:
+          path: /bookings/{id}/cancel
+          method: post
+
 resources:
   Resources:
     BookingsTable:

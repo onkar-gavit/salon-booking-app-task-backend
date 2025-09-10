@@ -71,6 +71,18 @@
                 "LogGroupName": "/aws/lambda/booking-service-dev-createBooking"
               }
             },
+            "ConfirmBookingLogGroup": {
+              "Type": "AWS::Logs::LogGroup",
+              "Properties": {
+                "LogGroupName": "/aws/lambda/booking-service-dev-confirmBooking"
+              }
+            },
+            "CancelBookingLogGroup": {
+              "Type": "AWS::Logs::LogGroup",
+              "Properties": {
+                "LogGroupName": "/aws/lambda/booking-service-dev-cancelBooking"
+              }
+            },
             "IamRoleLambdaExecution": {
               "Type": "AWS::IAM::Role",
               "Properties": {
@@ -188,7 +200,7 @@
               "Properties": {
                 "Code": {
                   "S3Bucket": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
-                  "S3Key": "serverless/booking-service/dev/1757496460707-2025-09-10T09:27:40.707Z/createBooking.zip"
+                  "S3Key": "serverless/booking-service/dev/1757502714923-2025-09-10T11:11:54.923Z/createBooking.zip"
                 },
                 "Handler": "src/handlers/createBookingHandler.handler",
                 "Runtime": "nodejs18.x",
@@ -215,14 +227,98 @@
                 "CreateBookingLogGroup"
               ]
             },
-            "CreateBookingLambdaVersioneXZpLXcEupITAqDplIk7NnQT9UlANdN1lL8ECOi738": {
+            "ConfirmBookingLambdaFunction": {
+              "Type": "AWS::Lambda::Function",
+              "Properties": {
+                "Code": {
+                  "S3Bucket": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
+                  "S3Key": "serverless/booking-service/dev/1757502714923-2025-09-10T11:11:54.923Z/confirmBooking.zip"
+                },
+                "Handler": "src/handlers/confirmBookingHandler.handler",
+                "Runtime": "nodejs18.x",
+                "FunctionName": "booking-service-dev-confirmBooking",
+                "MemorySize": 1024,
+                "Timeout": 6,
+                "Environment": {
+                  "Variables": {
+                    "DATABASE_URL": "postgresql://backendapp:backend123@salonapp.cheme8w42ux8.ap-south-1.rds.amazonaws.com/salondb",
+                    "FIREBASE_SECRET_NAME": "<REDACTED>",
+                    "FIREBASE_WEB_API_KEY": "<REDACTED>",
+                    "CUSTOM_AWS_REGION": "ap-south-1",
+                    "DYNAMODB_BOOKINGS_TABLE": "BookingsTable"
+                  }
+                },
+                "Role": {
+                  "Fn::GetAtt": [
+                    "IamRoleLambdaExecution",
+                    "Arn"
+                  ]
+                }
+              },
+              "DependsOn": [
+                "ConfirmBookingLogGroup"
+              ]
+            },
+            "CancelBookingLambdaFunction": {
+              "Type": "AWS::Lambda::Function",
+              "Properties": {
+                "Code": {
+                  "S3Bucket": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
+                  "S3Key": "serverless/booking-service/dev/1757502714923-2025-09-10T11:11:54.923Z/cancelBooking.zip"
+                },
+                "Handler": "src/handlers/cancelBookingHandler.handler",
+                "Runtime": "nodejs18.x",
+                "FunctionName": "booking-service-dev-cancelBooking",
+                "MemorySize": 1024,
+                "Timeout": 6,
+                "Environment": {
+                  "Variables": {
+                    "DATABASE_URL": "postgresql://backendapp:backend123@salonapp.cheme8w42ux8.ap-south-1.rds.amazonaws.com/salondb",
+                    "FIREBASE_SECRET_NAME": "<REDACTED>",
+                    "FIREBASE_WEB_API_KEY": "<REDACTED>",
+                    "CUSTOM_AWS_REGION": "ap-south-1",
+                    "DYNAMODB_BOOKINGS_TABLE": "BookingsTable"
+                  }
+                },
+                "Role": {
+                  "Fn::GetAtt": [
+                    "IamRoleLambdaExecution",
+                    "Arn"
+                  ]
+                }
+              },
+              "DependsOn": [
+                "CancelBookingLogGroup"
+              ]
+            },
+            "CancelBookingLambdaVersionCAaRts4D07D5pE7YoaP7XjigmDBKMh20a7C5Q7AU": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "CancelBookingLambdaFunction"
+                },
+                "CodeSha256": "k/6VlozHJenPEr63r4RxijPByGUuUhxW8viYBH4RUps="
+              }
+            },
+            "CreateBookingLambdaVersionoYgAxSIywNhq3htSOBbukFGpXBIBvhJAOth75JgqypM": {
               "Type": "AWS::Lambda::Version",
               "DeletionPolicy": "Retain",
               "Properties": {
                 "FunctionName": {
                   "Ref": "CreateBookingLambdaFunction"
                 },
-                "CodeSha256": "vOCUIEk3+RyHPw2upCILYs7A4oBhjtST9xoHmKFTs4U="
+                "CodeSha256": "K2iH83YT1veR3CKZ9h8dM6HiBJMxO2OsOPtJWNABzoI="
+              }
+            },
+            "ConfirmBookingLambdaVersionU94J36c3DEdGaSQcpHD8BtfpJPgY4nscyIm5HlgPVU": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "ConfirmBookingLambdaFunction"
+                },
+                "CodeSha256": "4vP5sHN7/ZpxZq2VNhwOaBAe6S/xeWbDVUxdIq4qaDs="
               }
             },
             "CreateBookingLambdaPermissionHttpApi": {
@@ -294,6 +390,144 @@
               },
               "DependsOn": "HttpApiIntegrationCreateBooking"
             },
+            "ConfirmBookingLambdaPermissionHttpApi": {
+              "Type": "AWS::Lambda::Permission",
+              "Properties": {
+                "FunctionName": {
+                  "Fn::GetAtt": [
+                    "ConfirmBookingLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":execute-api:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":",
+                      "fxh1zg6455",
+                      "/*"
+                    ]
+                  ]
+                }
+              }
+            },
+            "HttpApiIntegrationConfirmBooking": {
+              "Type": "AWS::ApiGatewayV2::Integration",
+              "Properties": {
+                "ApiId": "fxh1zg6455",
+                "IntegrationType": "AWS_PROXY",
+                "IntegrationUri": {
+                  "Fn::GetAtt": [
+                    "ConfirmBookingLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "PayloadFormatVersion": "2.0",
+                "TimeoutInMillis": 30000
+              }
+            },
+            "HttpApiRoutePostBookingsIdVarConfirm": {
+              "Type": "AWS::ApiGatewayV2::Route",
+              "Properties": {
+                "ApiId": "fxh1zg6455",
+                "RouteKey": "POST /bookings/{id}/confirm",
+                "Target": {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      "integrations",
+                      {
+                        "Ref": "HttpApiIntegrationConfirmBooking"
+                      }
+                    ]
+                  ]
+                }
+              },
+              "DependsOn": "HttpApiIntegrationConfirmBooking"
+            },
+            "CancelBookingLambdaPermissionHttpApi": {
+              "Type": "AWS::Lambda::Permission",
+              "Properties": {
+                "FunctionName": {
+                  "Fn::GetAtt": [
+                    "CancelBookingLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":execute-api:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":",
+                      "fxh1zg6455",
+                      "/*"
+                    ]
+                  ]
+                }
+              }
+            },
+            "HttpApiIntegrationCancelBooking": {
+              "Type": "AWS::ApiGatewayV2::Integration",
+              "Properties": {
+                "ApiId": "fxh1zg6455",
+                "IntegrationType": "AWS_PROXY",
+                "IntegrationUri": {
+                  "Fn::GetAtt": [
+                    "CancelBookingLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "PayloadFormatVersion": "2.0",
+                "TimeoutInMillis": 30000
+              }
+            },
+            "HttpApiRoutePostBookingsIdVarCancel": {
+              "Type": "AWS::ApiGatewayV2::Route",
+              "Properties": {
+                "ApiId": "fxh1zg6455",
+                "RouteKey": "POST /bookings/{id}/cancel",
+                "Target": {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      "integrations",
+                      {
+                        "Ref": "HttpApiIntegrationCancelBooking"
+                      }
+                    ]
+                  ]
+                }
+              },
+              "DependsOn": "HttpApiIntegrationCancelBooking"
+            },
             "BookingsTable": {
               "Type": "AWS::DynamoDB::Table",
               "Properties": {
@@ -350,13 +584,31 @@
                 "Name": "sls-booking-service-dev-ServerlessDeploymentBucketName"
               }
             },
+            "CancelBookingLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "CancelBookingLambdaVersionCAaRts4D07D5pE7YoaP7XjigmDBKMh20a7C5Q7AU"
+              },
+              "Export": {
+                "Name": "sls-booking-service-dev-CancelBookingLambdaFunctionQualifiedArn"
+              }
+            },
             "CreateBookingLambdaFunctionQualifiedArn": {
               "Description": "Current Lambda function version",
               "Value": {
-                "Ref": "CreateBookingLambdaVersioneXZpLXcEupITAqDplIk7NnQT9UlANdN1lL8ECOi738"
+                "Ref": "CreateBookingLambdaVersionoYgAxSIywNhq3htSOBbukFGpXBIBvhJAOth75JgqypM"
               },
               "Export": {
                 "Name": "sls-booking-service-dev-CreateBookingLambdaFunctionQualifiedArn"
+              }
+            },
+            "ConfirmBookingLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "ConfirmBookingLambdaVersionU94J36c3DEdGaSQcpHD8BtfpJPgY4nscyIm5HlgPVU"
+              },
+              "Export": {
+                "Name": "sls-booking-service-dev-ConfirmBookingLambdaFunctionQualifiedArn"
               }
             }
           }
@@ -388,7 +640,51 @@
           "timeout": 6,
           "runtime": "nodejs18.x",
           "vpc": {},
-          "versionLogicalId": "CreateBookingLambdaVersioneXZpLXcEupITAqDplIk7NnQT9UlANdN1lL8ECOi738"
+          "versionLogicalId": "CreateBookingLambdaVersionoYgAxSIywNhq3htSOBbukFGpXBIBvhJAOth75JgqypM"
+        },
+        "confirmBooking": {
+          "handler": "src/handlers/confirmBookingHandler.handler",
+          "events": [
+            {
+              "httpApi": {
+                "path": "/bookings/{id}/confirm",
+                "method": "post"
+              },
+              "resolvedMethod": "POST",
+              "resolvedPath": "/bookings/{id}/confirm"
+            }
+          ],
+          "name": "booking-service-dev-confirmBooking",
+          "package": {
+            "artifact": ".serverless\\confirmBooking.zip"
+          },
+          "memory": 1024,
+          "timeout": 6,
+          "runtime": "nodejs18.x",
+          "vpc": {},
+          "versionLogicalId": "ConfirmBookingLambdaVersionU94J36c3DEdGaSQcpHD8BtfpJPgY4nscyIm5HlgPVU"
+        },
+        "cancelBooking": {
+          "handler": "src/handlers/cancelBookingHandler.handler",
+          "events": [
+            {
+              "httpApi": {
+                "path": "/bookings/{id}/cancel",
+                "method": "post"
+              },
+              "resolvedMethod": "POST",
+              "resolvedPath": "/bookings/{id}/cancel"
+            }
+          ],
+          "name": "booking-service-dev-cancelBooking",
+          "package": {
+            "artifact": ".serverless\\cancelBooking.zip"
+          },
+          "memory": 1024,
+          "timeout": 6,
+          "runtime": "nodejs18.x",
+          "vpc": {},
+          "versionLogicalId": "CancelBookingLambdaVersionCAaRts4D07D5pE7YoaP7XjigmDBKMh20a7C5Q7AU"
         }
       },
       "resources": {
@@ -469,7 +765,7 @@
         ],
         "artifactsS3KeyDirname": "serverless/booking-service/dev/code-artifacts",
         "deploymentBucket": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
-        "artifactDirectoryName": "serverless/booking-service/dev/1757496460707-2025-09-10T09:27:40.707Z"
+        "artifactDirectoryName": "serverless/booking-service/dev/1757502714923-2025-09-10T11:11:54.923Z"
       }
     },
     "provider": {
@@ -536,6 +832,18 @@
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
               "LogGroupName": "/aws/lambda/booking-service-dev-createBooking"
+            }
+          },
+          "ConfirmBookingLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/booking-service-dev-confirmBooking"
+            }
+          },
+          "CancelBookingLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/booking-service-dev-cancelBooking"
             }
           },
           "IamRoleLambdaExecution": {
@@ -655,7 +963,7 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
-                "S3Key": "serverless/booking-service/dev/1757496460707-2025-09-10T09:27:40.707Z/createBooking.zip"
+                "S3Key": "serverless/booking-service/dev/1757502714923-2025-09-10T11:11:54.923Z/createBooking.zip"
               },
               "Handler": "src/handlers/createBookingHandler.handler",
               "Runtime": "nodejs18.x",
@@ -682,14 +990,98 @@
               "CreateBookingLogGroup"
             ]
           },
-          "CreateBookingLambdaVersioneXZpLXcEupITAqDplIk7NnQT9UlANdN1lL8ECOi738": {
+          "ConfirmBookingLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
+                "S3Key": "serverless/booking-service/dev/1757502714923-2025-09-10T11:11:54.923Z/confirmBooking.zip"
+              },
+              "Handler": "src/handlers/confirmBookingHandler.handler",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "booking-service-dev-confirmBooking",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "DATABASE_URL": "postgresql://backendapp:backend123@salonapp.cheme8w42ux8.ap-south-1.rds.amazonaws.com/salondb",
+                  "FIREBASE_SECRET_NAME": "<REDACTED>",
+                  "FIREBASE_WEB_API_KEY": "<REDACTED>",
+                  "CUSTOM_AWS_REGION": "ap-south-1",
+                  "DYNAMODB_BOOKINGS_TABLE": "BookingsTable"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "ConfirmBookingLogGroup"
+            ]
+          },
+          "CancelBookingLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
+                "S3Key": "serverless/booking-service/dev/1757502714923-2025-09-10T11:11:54.923Z/cancelBooking.zip"
+              },
+              "Handler": "src/handlers/cancelBookingHandler.handler",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "booking-service-dev-cancelBooking",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "DATABASE_URL": "postgresql://backendapp:backend123@salonapp.cheme8w42ux8.ap-south-1.rds.amazonaws.com/salondb",
+                  "FIREBASE_SECRET_NAME": "<REDACTED>",
+                  "FIREBASE_WEB_API_KEY": "<REDACTED>",
+                  "CUSTOM_AWS_REGION": "ap-south-1",
+                  "DYNAMODB_BOOKINGS_TABLE": "BookingsTable"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "CancelBookingLogGroup"
+            ]
+          },
+          "CancelBookingLambdaVersionCAaRts4D07D5pE7YoaP7XjigmDBKMh20a7C5Q7AU": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "CancelBookingLambdaFunction"
+              },
+              "CodeSha256": "k/6VlozHJenPEr63r4RxijPByGUuUhxW8viYBH4RUps="
+            }
+          },
+          "CreateBookingLambdaVersionoYgAxSIywNhq3htSOBbukFGpXBIBvhJAOth75JgqypM": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "CreateBookingLambdaFunction"
               },
-              "CodeSha256": "vOCUIEk3+RyHPw2upCILYs7A4oBhjtST9xoHmKFTs4U="
+              "CodeSha256": "K2iH83YT1veR3CKZ9h8dM6HiBJMxO2OsOPtJWNABzoI="
+            }
+          },
+          "ConfirmBookingLambdaVersionU94J36c3DEdGaSQcpHD8BtfpJPgY4nscyIm5HlgPVU": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "ConfirmBookingLambdaFunction"
+              },
+              "CodeSha256": "4vP5sHN7/ZpxZq2VNhwOaBAe6S/xeWbDVUxdIq4qaDs="
             }
           },
           "CreateBookingLambdaPermissionHttpApi": {
@@ -761,6 +1153,144 @@
             },
             "DependsOn": "HttpApiIntegrationCreateBooking"
           },
+          "ConfirmBookingLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "ConfirmBookingLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    "fxh1zg6455",
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationConfirmBooking": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": "fxh1zg6455",
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "Fn::GetAtt": [
+                  "ConfirmBookingLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRoutePostBookingsIdVarConfirm": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": "fxh1zg6455",
+              "RouteKey": "POST /bookings/{id}/confirm",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationConfirmBooking"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationConfirmBooking"
+          },
+          "CancelBookingLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "CancelBookingLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    "fxh1zg6455",
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationCancelBooking": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": "fxh1zg6455",
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "Fn::GetAtt": [
+                  "CancelBookingLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRoutePostBookingsIdVarCancel": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": "fxh1zg6455",
+              "RouteKey": "POST /bookings/{id}/cancel",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationCancelBooking"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationCancelBooking"
+          },
           "BookingsTable": {
             "Type": "AWS::DynamoDB::Table",
             "Properties": {
@@ -817,13 +1347,31 @@
               "Name": "sls-booking-service-dev-ServerlessDeploymentBucketName"
             }
           },
+          "CancelBookingLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "CancelBookingLambdaVersionCAaRts4D07D5pE7YoaP7XjigmDBKMh20a7C5Q7AU"
+            },
+            "Export": {
+              "Name": "sls-booking-service-dev-CancelBookingLambdaFunctionQualifiedArn"
+            }
+          },
           "CreateBookingLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "CreateBookingLambdaVersioneXZpLXcEupITAqDplIk7NnQT9UlANdN1lL8ECOi738"
+              "Ref": "CreateBookingLambdaVersionoYgAxSIywNhq3htSOBbukFGpXBIBvhJAOth75JgqypM"
             },
             "Export": {
               "Name": "sls-booking-service-dev-CreateBookingLambdaFunctionQualifiedArn"
+            }
+          },
+          "ConfirmBookingLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "ConfirmBookingLambdaVersionU94J36c3DEdGaSQcpHD8BtfpJPgY4nscyIm5HlgPVU"
+            },
+            "Export": {
+              "Name": "sls-booking-service-dev-ConfirmBookingLambdaFunctionQualifiedArn"
             }
           }
         }
@@ -839,7 +1387,7 @@
       "serviceProvider": null,
       "instanceParameters": null
     },
-    "serviceRawFile": "service: booking-service\n\nprovider:\n  name: aws\n  runtime: nodejs18.x\n  region: ${env:CUSTOM_AWS_REGION}\n  httpApi:\n    id: ${file(serverless-id.json):http_api_id}  \n  environment:\n    DATABASE_URL: ${env:DATABASE_URL}\n    FIREBASE_SECRET_NAME: ${env:FIREBASE_SECRET_NAME}\n    FIREBASE_WEB_API_KEY: ${env:FIREBASE_WEB_API_KEY}\n    CUSTOM_AWS_REGION: ${env:CUSTOM_AWS_REGION}\n    DYNAMODB_BOOKINGS_TABLE: ${env:DYNAMODB_BOOKINGS_TABLE}\n\n  iam:\n    role:\n      statements:\n        - Effect: Allow\n          Action:\n            - ssm:GetParameter\n            - ssm:GetParameters\n          Resource:\n            - Fn::Sub: arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${env:FIREBASE_SECRET_NAME}\n        - Effect: Allow\n          Action:\n            - dynamodb:GetItem\n            - dynamodb:PutItem\n            - dynamodb:UpdateItem\n            - dynamodb:DeleteItem\n            - dynamodb:Query\n            - dynamodb:Scan\n          Resource:\n            - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/IdempotencyTable\n            - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${env:DYNAMODB_BOOKINGS_TABLE}\n            - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${env:DYNAMODB_BOOKINGS_TABLE}/index/*\n\nuseDotenv: true\n\nbuild:\n  esbuild: false\n\nfunctions:\n  createBooking:\n    handler: src/handlers/createBookingHandler.handler\n    events:\n      - httpApi:\n          path: /bookings\n          method: post\n\nresources:\n  Resources:\n    BookingsTable:\n      Type: AWS::DynamoDB::Table\n      Properties:\n        TableName: ${env:DYNAMODB_BOOKINGS_TABLE}\n        BillingMode: PAY_PER_REQUEST\n        AttributeDefinitions:\n          - AttributeName: id\n            AttributeType: S\n          - AttributeName: locationId\n            AttributeType: S\n          - AttributeName: startTime\n            AttributeType: S\n        KeySchema:\n          - AttributeName: id\n            KeyType: HASH\n        GlobalSecondaryIndexes:\n          - IndexName: LocationTimeIndex\n            KeySchema:\n              - AttributeName: locationId\n                KeyType: HASH\n              - AttributeName: startTime\n                KeyType: RANGE\n            Projection:\n              ProjectionType: ALL\n        StreamSpecification:\n          StreamViewType: NEW_AND_OLD_IMAGES\n\nplugins:\n  - serverless-webpack\n  - serverless-offline\n  - serverless-dotenv-plugin\n\ncustom:\n  webpack:\n    webpackConfig: 'webpack.config.js'\n    includeModules: true\n    packager: 'yarn'\n    keepOutputDirectory: true\n\npackage:\n  individually: true\n  patterns:\n    - '!../../../node_modules/**'\n    - '../../../libs/generated/client/**'\n    - '../../../node_modules/@prisma/client/**'\n    - '../../../node_modules/.prisma/client/**'\n    - '../../../node_modules/@prisma/engines/libquery_engine-*.so.node'\n    - '../../../node_modules/.prisma/client/libquery_engine-*.so.node'\n",
+    "serviceRawFile": "service: booking-service\n\nprovider:\n  name: aws\n  runtime: nodejs18.x\n  region: ${env:CUSTOM_AWS_REGION}\n  httpApi:\n    id: ${file(serverless-id.json):http_api_id}  \n  environment:\n    DATABASE_URL: ${env:DATABASE_URL}\n    FIREBASE_SECRET_NAME: ${env:FIREBASE_SECRET_NAME}\n    FIREBASE_WEB_API_KEY: ${env:FIREBASE_WEB_API_KEY}\n    CUSTOM_AWS_REGION: ${env:CUSTOM_AWS_REGION}\n    DYNAMODB_BOOKINGS_TABLE: ${env:DYNAMODB_BOOKINGS_TABLE}\n\n  iam:\n    role:\n      statements:\n        - Effect: Allow\n          Action:\n            - ssm:GetParameter\n            - ssm:GetParameters\n          Resource:\n            - Fn::Sub: arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${env:FIREBASE_SECRET_NAME}\n        - Effect: Allow\n          Action:\n            - dynamodb:GetItem\n            - dynamodb:PutItem\n            - dynamodb:UpdateItem\n            - dynamodb:DeleteItem\n            - dynamodb:Query\n            - dynamodb:Scan\n          Resource:\n            - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/IdempotencyTable\n            - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${env:DYNAMODB_BOOKINGS_TABLE}\n            - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${env:DYNAMODB_BOOKINGS_TABLE}/index/*\n\nuseDotenv: true\n\nbuild:\n  esbuild: false\n\nfunctions:\n  createBooking:\n    handler: src/handlers/createBookingHandler.handler\n    events:\n      - httpApi:\n          path: /bookings\n          method: post\n\n  confirmBooking:\n    handler: src/handlers/confirmBookingHandler.handler\n    events:\n      - httpApi:\n          path: /bookings/{id}/confirm\n          method: post\n\n  cancelBooking:\n    handler: src/handlers/cancelBookingHandler.handler\n    events:\n      - httpApi:\n          path: /bookings/{id}/cancel\n          method: post\n\nresources:\n  Resources:\n    BookingsTable:\n      Type: AWS::DynamoDB::Table\n      Properties:\n        TableName: ${env:DYNAMODB_BOOKINGS_TABLE}\n        BillingMode: PAY_PER_REQUEST\n        AttributeDefinitions:\n          - AttributeName: id\n            AttributeType: S\n          - AttributeName: locationId\n            AttributeType: S\n          - AttributeName: startTime\n            AttributeType: S\n        KeySchema:\n          - AttributeName: id\n            KeyType: HASH\n        GlobalSecondaryIndexes:\n          - IndexName: LocationTimeIndex\n            KeySchema:\n              - AttributeName: locationId\n                KeyType: HASH\n              - AttributeName: startTime\n                KeyType: RANGE\n            Projection:\n              ProjectionType: ALL\n        StreamSpecification:\n          StreamViewType: NEW_AND_OLD_IMAGES\n\nplugins:\n  - serverless-webpack\n  - serverless-offline\n  - serverless-dotenv-plugin\n\ncustom:\n  webpack:\n    webpackConfig: 'webpack.config.js'\n    includeModules: true\n    packager: 'yarn'\n    keepOutputDirectory: true\n\npackage:\n  individually: true\n  patterns:\n    - '!../../../node_modules/**'\n    - '../../../libs/generated/client/**'\n    - '../../../node_modules/@prisma/client/**'\n    - '../../../node_modules/.prisma/client/**'\n    - '../../../node_modules/@prisma/engines/libquery_engine-*.so.node'\n    - '../../../node_modules/.prisma/client/libquery_engine-*.so.node'\n",
     "command": [
       "deploy"
     ],
@@ -852,12 +1400,24 @@
     "serviceProviderAwsCfStackName": "booking-service-dev",
     "serviceProviderAwsCfStackId": "arn:aws:cloudformation:ap-south-1:269578498075:stack/booking-service-dev/16704800-8e15-11f0-b44b-06f2a63c0d0d",
     "serviceProviderAwsCfStackCreated": "2025-09-10T07:09:27.110Z",
-    "serviceProviderAwsCfStackUpdated": "2025-09-10T09:18:38.222Z",
+    "serviceProviderAwsCfStackUpdated": "2025-09-10T11:03:01.160Z",
     "serviceProviderAwsCfStackStatus": "UPDATE_COMPLETE",
     "serviceProviderAwsCfStackOutputs": [
       {
+        "OutputKey": "ConfirmBookingLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:ap-south-1:269578498075:function:booking-service-dev-confirmBooking:2",
+        "Description": "Current Lambda function version",
+        "ExportName": "sls-booking-service-dev-ConfirmBookingLambdaFunctionQualifiedArn"
+      },
+      {
+        "OutputKey": "CancelBookingLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:ap-south-1:269578498075:function:booking-service-dev-cancelBooking:2",
+        "Description": "Current Lambda function version",
+        "ExportName": "sls-booking-service-dev-CancelBookingLambdaFunctionQualifiedArn"
+      },
+      {
         "OutputKey": "CreateBookingLambdaFunctionQualifiedArn",
-        "OutputValue": "arn:aws:lambda:ap-south-1:269578498075:function:booking-service-dev-createBooking:5",
+        "OutputValue": "arn:aws:lambda:ap-south-1:269578498075:function:booking-service-dev-createBooking:8",
         "Description": "Current Lambda function version",
         "ExportName": "sls-booking-service-dev-CreateBookingLambdaFunctionQualifiedArn"
       },
@@ -875,6 +1435,18 @@
           "Type": "AWS::Logs::LogGroup",
           "Properties": {
             "LogGroupName": "/aws/lambda/booking-service-dev-createBooking"
+          }
+        },
+        "ConfirmBookingLogGroup": {
+          "Type": "AWS::Logs::LogGroup",
+          "Properties": {
+            "LogGroupName": "/aws/lambda/booking-service-dev-confirmBooking"
+          }
+        },
+        "CancelBookingLogGroup": {
+          "Type": "AWS::Logs::LogGroup",
+          "Properties": {
+            "LogGroupName": "/aws/lambda/booking-service-dev-cancelBooking"
           }
         },
         "IamRoleLambdaExecution": {
@@ -994,7 +1566,7 @@
           "Properties": {
             "Code": {
               "S3Bucket": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
-              "S3Key": "serverless/booking-service/dev/1757496460707-2025-09-10T09:27:40.707Z/createBooking.zip"
+              "S3Key": "serverless/booking-service/dev/1757502714923-2025-09-10T11:11:54.923Z/createBooking.zip"
             },
             "Handler": "src/handlers/createBookingHandler.handler",
             "Runtime": "nodejs18.x",
@@ -1021,14 +1593,98 @@
             "CreateBookingLogGroup"
           ]
         },
-        "CreateBookingLambdaVersioneXZpLXcEupITAqDplIk7NnQT9UlANdN1lL8ECOi738": {
+        "ConfirmBookingLambdaFunction": {
+          "Type": "AWS::Lambda::Function",
+          "Properties": {
+            "Code": {
+              "S3Bucket": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
+              "S3Key": "serverless/booking-service/dev/1757502714923-2025-09-10T11:11:54.923Z/confirmBooking.zip"
+            },
+            "Handler": "src/handlers/confirmBookingHandler.handler",
+            "Runtime": "nodejs18.x",
+            "FunctionName": "booking-service-dev-confirmBooking",
+            "MemorySize": 1024,
+            "Timeout": 6,
+            "Environment": {
+              "Variables": {
+                "DATABASE_URL": "postgresql://backendapp:backend123@salonapp.cheme8w42ux8.ap-south-1.rds.amazonaws.com/salondb",
+                "FIREBASE_SECRET_NAME": "<REDACTED>",
+                "FIREBASE_WEB_API_KEY": "<REDACTED>",
+                "CUSTOM_AWS_REGION": "ap-south-1",
+                "DYNAMODB_BOOKINGS_TABLE": "BookingsTable"
+              }
+            },
+            "Role": {
+              "Fn::GetAtt": [
+                "IamRoleLambdaExecution",
+                "Arn"
+              ]
+            }
+          },
+          "DependsOn": [
+            "ConfirmBookingLogGroup"
+          ]
+        },
+        "CancelBookingLambdaFunction": {
+          "Type": "AWS::Lambda::Function",
+          "Properties": {
+            "Code": {
+              "S3Bucket": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
+              "S3Key": "serverless/booking-service/dev/1757502714923-2025-09-10T11:11:54.923Z/cancelBooking.zip"
+            },
+            "Handler": "src/handlers/cancelBookingHandler.handler",
+            "Runtime": "nodejs18.x",
+            "FunctionName": "booking-service-dev-cancelBooking",
+            "MemorySize": 1024,
+            "Timeout": 6,
+            "Environment": {
+              "Variables": {
+                "DATABASE_URL": "postgresql://backendapp:backend123@salonapp.cheme8w42ux8.ap-south-1.rds.amazonaws.com/salondb",
+                "FIREBASE_SECRET_NAME": "<REDACTED>",
+                "FIREBASE_WEB_API_KEY": "<REDACTED>",
+                "CUSTOM_AWS_REGION": "ap-south-1",
+                "DYNAMODB_BOOKINGS_TABLE": "BookingsTable"
+              }
+            },
+            "Role": {
+              "Fn::GetAtt": [
+                "IamRoleLambdaExecution",
+                "Arn"
+              ]
+            }
+          },
+          "DependsOn": [
+            "CancelBookingLogGroup"
+          ]
+        },
+        "CancelBookingLambdaVersionCAaRts4D07D5pE7YoaP7XjigmDBKMh20a7C5Q7AU": {
+          "Type": "AWS::Lambda::Version",
+          "DeletionPolicy": "Retain",
+          "Properties": {
+            "FunctionName": {
+              "Ref": "CancelBookingLambdaFunction"
+            },
+            "CodeSha256": "k/6VlozHJenPEr63r4RxijPByGUuUhxW8viYBH4RUps="
+          }
+        },
+        "CreateBookingLambdaVersionoYgAxSIywNhq3htSOBbukFGpXBIBvhJAOth75JgqypM": {
           "Type": "AWS::Lambda::Version",
           "DeletionPolicy": "Retain",
           "Properties": {
             "FunctionName": {
               "Ref": "CreateBookingLambdaFunction"
             },
-            "CodeSha256": "vOCUIEk3+RyHPw2upCILYs7A4oBhjtST9xoHmKFTs4U="
+            "CodeSha256": "K2iH83YT1veR3CKZ9h8dM6HiBJMxO2OsOPtJWNABzoI="
+          }
+        },
+        "ConfirmBookingLambdaVersionU94J36c3DEdGaSQcpHD8BtfpJPgY4nscyIm5HlgPVU": {
+          "Type": "AWS::Lambda::Version",
+          "DeletionPolicy": "Retain",
+          "Properties": {
+            "FunctionName": {
+              "Ref": "ConfirmBookingLambdaFunction"
+            },
+            "CodeSha256": "4vP5sHN7/ZpxZq2VNhwOaBAe6S/xeWbDVUxdIq4qaDs="
           }
         },
         "CreateBookingLambdaPermissionHttpApi": {
@@ -1100,6 +1756,144 @@
           },
           "DependsOn": "HttpApiIntegrationCreateBooking"
         },
+        "ConfirmBookingLambdaPermissionHttpApi": {
+          "Type": "AWS::Lambda::Permission",
+          "Properties": {
+            "FunctionName": {
+              "Fn::GetAtt": [
+                "ConfirmBookingLambdaFunction",
+                "Arn"
+              ]
+            },
+            "Action": "lambda:InvokeFunction",
+            "Principal": "apigateway.amazonaws.com",
+            "SourceArn": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:",
+                  {
+                    "Ref": "AWS::Partition"
+                  },
+                  ":execute-api:",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId"
+                  },
+                  ":",
+                  "fxh1zg6455",
+                  "/*"
+                ]
+              ]
+            }
+          }
+        },
+        "HttpApiIntegrationConfirmBooking": {
+          "Type": "AWS::ApiGatewayV2::Integration",
+          "Properties": {
+            "ApiId": "fxh1zg6455",
+            "IntegrationType": "AWS_PROXY",
+            "IntegrationUri": {
+              "Fn::GetAtt": [
+                "ConfirmBookingLambdaFunction",
+                "Arn"
+              ]
+            },
+            "PayloadFormatVersion": "2.0",
+            "TimeoutInMillis": 30000
+          }
+        },
+        "HttpApiRoutePostBookingsIdVarConfirm": {
+          "Type": "AWS::ApiGatewayV2::Route",
+          "Properties": {
+            "ApiId": "fxh1zg6455",
+            "RouteKey": "POST /bookings/{id}/confirm",
+            "Target": {
+              "Fn::Join": [
+                "/",
+                [
+                  "integrations",
+                  {
+                    "Ref": "HttpApiIntegrationConfirmBooking"
+                  }
+                ]
+              ]
+            }
+          },
+          "DependsOn": "HttpApiIntegrationConfirmBooking"
+        },
+        "CancelBookingLambdaPermissionHttpApi": {
+          "Type": "AWS::Lambda::Permission",
+          "Properties": {
+            "FunctionName": {
+              "Fn::GetAtt": [
+                "CancelBookingLambdaFunction",
+                "Arn"
+              ]
+            },
+            "Action": "lambda:InvokeFunction",
+            "Principal": "apigateway.amazonaws.com",
+            "SourceArn": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:",
+                  {
+                    "Ref": "AWS::Partition"
+                  },
+                  ":execute-api:",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId"
+                  },
+                  ":",
+                  "fxh1zg6455",
+                  "/*"
+                ]
+              ]
+            }
+          }
+        },
+        "HttpApiIntegrationCancelBooking": {
+          "Type": "AWS::ApiGatewayV2::Integration",
+          "Properties": {
+            "ApiId": "fxh1zg6455",
+            "IntegrationType": "AWS_PROXY",
+            "IntegrationUri": {
+              "Fn::GetAtt": [
+                "CancelBookingLambdaFunction",
+                "Arn"
+              ]
+            },
+            "PayloadFormatVersion": "2.0",
+            "TimeoutInMillis": 30000
+          }
+        },
+        "HttpApiRoutePostBookingsIdVarCancel": {
+          "Type": "AWS::ApiGatewayV2::Route",
+          "Properties": {
+            "ApiId": "fxh1zg6455",
+            "RouteKey": "POST /bookings/{id}/cancel",
+            "Target": {
+              "Fn::Join": [
+                "/",
+                [
+                  "integrations",
+                  {
+                    "Ref": "HttpApiIntegrationCancelBooking"
+                  }
+                ]
+              ]
+            }
+          },
+          "DependsOn": "HttpApiIntegrationCancelBooking"
+        },
         "BookingsTable": {
           "Type": "AWS::DynamoDB::Table",
           "Properties": {
@@ -1156,13 +1950,31 @@
             "Name": "sls-booking-service-dev-ServerlessDeploymentBucketName"
           }
         },
+        "CancelBookingLambdaFunctionQualifiedArn": {
+          "Description": "Current Lambda function version",
+          "Value": {
+            "Ref": "CancelBookingLambdaVersionCAaRts4D07D5pE7YoaP7XjigmDBKMh20a7C5Q7AU"
+          },
+          "Export": {
+            "Name": "sls-booking-service-dev-CancelBookingLambdaFunctionQualifiedArn"
+          }
+        },
         "CreateBookingLambdaFunctionQualifiedArn": {
           "Description": "Current Lambda function version",
           "Value": {
-            "Ref": "CreateBookingLambdaVersioneXZpLXcEupITAqDplIk7NnQT9UlANdN1lL8ECOi738"
+            "Ref": "CreateBookingLambdaVersionoYgAxSIywNhq3htSOBbukFGpXBIBvhJAOth75JgqypM"
           },
           "Export": {
             "Name": "sls-booking-service-dev-CreateBookingLambdaFunctionQualifiedArn"
+          }
+        },
+        "ConfirmBookingLambdaFunctionQualifiedArn": {
+          "Description": "Current Lambda function version",
+          "Value": {
+            "Ref": "ConfirmBookingLambdaVersionU94J36c3DEdGaSQcpHD8BtfpJPgY4nscyIm5HlgPVU"
+          },
+          "Export": {
+            "Name": "sls-booking-service-dev-ConfirmBookingLambdaFunctionQualifiedArn"
           }
         }
       }

@@ -7,6 +7,8 @@ export declare class BookingService {
     private getServiceDetails;
     private validateCustomer;
     private checkForOverlappingBookings;
+    confirmBooking(bookingId: string, businessId: string): Promise<Booking>;
+    cancelBooking(bookingId: string, businessId: string): Promise<Booking>;
     disconnect(): Promise<void>;
 }
 //# sourceMappingURL=bookingService.d.ts.map
