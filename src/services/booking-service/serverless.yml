@@ -1,0 +1,100 @@
+service: booking-service
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: ${env:CUSTOM_AWS_REGION}
+  httpApi:
+    id: ${file(serverless-id.json):http_api_id}  
+  environment:
+    DATABASE_URL: ${env:DATABASE_URL}
+    FIREBASE_SECRET_NAME: ${env:FIREBASE_SECRET_NAME}
+    FIREBASE_WEB_API_KEY: ${env:FIREBASE_WEB_API_KEY}
+    CUSTOM_AWS_REGION: ${env:CUSTOM_AWS_REGION}
+    DYNAMODB_BOOKINGS_TABLE: ${env:DYNAMODB_BOOKINGS_TABLE}
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - ssm:GetParameter
+            - ssm:GetParameters
+          Resource:
+            - Fn::Sub: arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${env:FIREBASE_SECRET_NAME}
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:Query
+            - dynamodb:Scan
+          Resource:
+            - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/IdempotencyTable
+            - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${env:DYNAMODB_BOOKINGS_TABLE}
+            - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${env:DYNAMODB_BOOKINGS_TABLE}/index/*
+
+useDotenv: true
+
+build:
+  esbuild: false
+
+functions:
+  createBooking:
+    handler: src/handlers/createBookingHandler.handler
+    events:
+      - httpApi:
+          path: /bookings
+          method: post
+
+resources:
+  Resources:
+    BookingsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${env:DYNAMODB_BOOKINGS_TABLE}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: locationId
+            AttributeType: S
+          - AttributeName: startTime
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: LocationTimeIndex
+            KeySchema:
+              - AttributeName: locationId
+                KeyType: HASH
+              - AttributeName: startTime
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
+
+plugins:
+  - serverless-webpack
+  - serverless-offline
+  - serverless-dotenv-plugin
+
+custom:
+  webpack:
+    webpackConfig: 'webpack.config.js'
+    includeModules: true
+    packager: 'yarn'
+    keepOutputDirectory: true
+
+package:
+  individually: true
+  patterns:
+    - '!../../../node_modules/**'
+    - '../../../libs/generated/client/**'
+    - '../../../node_modules/@prisma/client/**'
+    - '../../../node_modules/.prisma/client/**'
+    - '../../../node_modules/@prisma/engines/libquery_engine-*.so.node'
+    - '../../../node_modules/.prisma/client/libquery_engine-*.so.node'

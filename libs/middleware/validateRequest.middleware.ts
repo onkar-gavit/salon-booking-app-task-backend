@@ -11,7 +11,7 @@ export const validateRequest = <T>(
     before: async (request) => {
       try {
         const body = request.event.body ? JSON.parse(request.event.body) : {};
-        request.event.body = JSON.stringify(schema.parse(body));
+        request.event.body = JSON.stringify(schema.parse({ body }));
         return;
       } catch (err) {
         if (err instanceof ZodError) {

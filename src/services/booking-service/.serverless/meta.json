@@ -1,0 +1,1171 @@
+{
+  "C:\\Users\\Asus\\Desktop\\Assignment project\\salon-app-Backend\\src\\services\\booking-service\\serverless.yml": {
+    "versionFramework": "4.18.2",
+    "servicePath": "C:\\Users\\Asus\\Desktop\\Assignment project\\salon-app-Backend\\src\\services\\booking-service\\serverless.yml",
+    "serviceConfigFileName": "serverless.yml",
+    "service": {
+      "service": "booking-service",
+      "provider": {
+        "name": "aws",
+        "runtime": "nodejs18.x",
+        "region": "ap-south-1",
+        "httpApi": {
+          "id": "fxh1zg6455"
+        },
+        "environment": {
+          "DATABASE_URL": "postgresql://backendapp:backend123@salonapp.cheme8w42ux8.ap-south-1.rds.amazonaws.com/salondb",
+          "FIREBASE_SECRET_NAME": "<REDACTED>",
+          "FIREBASE_WEB_API_KEY": "<REDACTED>",
+          "CUSTOM_AWS_REGION": "ap-south-1",
+          "DYNAMODB_BOOKINGS_TABLE": "BookingsTable"
+        },
+        "iam": {
+          "role": {
+            "statements": [
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "ssm:GetParameter",
+                  "ssm:GetParameters"
+                ],
+                "Resource": [
+                  {
+                    "Fn::Sub": "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/FirebaseSDK"
+                  }
+                ]
+              },
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "dynamodb:GetItem",
+                  "dynamodb:PutItem",
+                  "dynamodb:UpdateItem",
+                  "dynamodb:DeleteItem",
+                  "dynamodb:Query",
+                  "dynamodb:Scan"
+                ],
+                "Resource": [
+                  {
+                    "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/IdempotencyTable"
+                  },
+                  {
+                    "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/BookingsTable"
+                  },
+                  {
+                    "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/BookingsTable/index/*"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "stage": "dev",
+        "versionFunctions": true,
+        "compiledCloudFormationTemplate": {
+          "AWSTemplateFormatVersion": "2010-09-09",
+          "Description": "The AWS CloudFormation template for this Serverless application",
+          "Resources": {
+            "CreateBookingLogGroup": {
+              "Type": "AWS::Logs::LogGroup",
+              "Properties": {
+                "LogGroupName": "/aws/lambda/booking-service-dev-createBooking"
+              }
+            },
+            "IamRoleLambdaExecution": {
+              "Type": "AWS::IAM::Role",
+              "Properties": {
+                "AssumeRolePolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Principal": {
+                        "Service": [
+                          "lambda.amazonaws.com"
+                        ]
+                      },
+                      "Action": [
+                        "sts:AssumeRole"
+                      ]
+                    }
+                  ]
+                },
+                "Policies": [
+                  {
+                    "PolicyName": {
+                      "Fn::Join": [
+                        "-",
+                        [
+                          "booking-service",
+                          "dev",
+                          "lambda"
+                        ]
+                      ]
+                    },
+                    "PolicyDocument": {
+                      "Version": "2012-10-17",
+                      "Statement": [
+                        {
+                          "Effect": "Allow",
+                          "Action": [
+                            "logs:CreateLogStream",
+                            "logs:CreateLogGroup",
+                            "logs:TagResource"
+                          ],
+                          "Resource": [
+                            {
+                              "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/booking-service-dev*:*"
+                            }
+                          ]
+                        },
+                        {
+                          "Effect": "Allow",
+                          "Action": [
+                            "logs:PutLogEvents"
+                          ],
+                          "Resource": [
+                            {
+                              "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/booking-service-dev*:*:*"
+                            }
+                          ]
+                        },
+                        {
+                          "Effect": "Allow",
+                          "Action": [
+                            "ssm:GetParameter",
+                            "ssm:GetParameters"
+                          ],
+                          "Resource": [
+                            {
+                              "Fn::Sub": "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/FirebaseSDK"
+                            }
+                          ]
+                        },
+                        {
+                          "Effect": "Allow",
+                          "Action": [
+                            "dynamodb:GetItem",
+                            "dynamodb:PutItem",
+                            "dynamodb:UpdateItem",
+                            "dynamodb:DeleteItem",
+                            "dynamodb:Query",
+                            "dynamodb:Scan"
+                          ],
+                          "Resource": [
+                            {
+                              "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/IdempotencyTable"
+                            },
+                            {
+                              "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/BookingsTable"
+                            },
+                            {
+                              "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/BookingsTable/index/*"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "Path": "/",
+                "RoleName": {
+                  "Fn::Join": [
+                    "-",
+                    [
+                      "booking-service",
+                      "dev",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      "lambdaRole"
+                    ]
+                  ]
+                }
+              }
+            },
+            "CreateBookingLambdaFunction": {
+              "Type": "AWS::Lambda::Function",
+              "Properties": {
+                "Code": {
+                  "S3Bucket": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
+                  "S3Key": "serverless/booking-service/dev/1757496460707-2025-09-10T09:27:40.707Z/createBooking.zip"
+                },
+                "Handler": "src/handlers/createBookingHandler.handler",
+                "Runtime": "nodejs18.x",
+                "FunctionName": "booking-service-dev-createBooking",
+                "MemorySize": 1024,
+                "Timeout": 6,
+                "Environment": {
+                  "Variables": {
+                    "DATABASE_URL": "postgresql://backendapp:backend123@salonapp.cheme8w42ux8.ap-south-1.rds.amazonaws.com/salondb",
+                    "FIREBASE_SECRET_NAME": "<REDACTED>",
+                    "FIREBASE_WEB_API_KEY": "<REDACTED>",
+                    "CUSTOM_AWS_REGION": "ap-south-1",
+                    "DYNAMODB_BOOKINGS_TABLE": "BookingsTable"
+                  }
+                },
+                "Role": {
+                  "Fn::GetAtt": [
+                    "IamRoleLambdaExecution",
+                    "Arn"
+                  ]
+                }
+              },
+              "DependsOn": [
+                "CreateBookingLogGroup"
+              ]
+            },
+            "CreateBookingLambdaVersioneXZpLXcEupITAqDplIk7NnQT9UlANdN1lL8ECOi738": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "CreateBookingLambdaFunction"
+                },
+                "CodeSha256": "vOCUIEk3+RyHPw2upCILYs7A4oBhjtST9xoHmKFTs4U="
+              }
+            },
+            "CreateBookingLambdaPermissionHttpApi": {
+              "Type": "AWS::Lambda::Permission",
+              "Properties": {
+                "FunctionName": {
+                  "Fn::GetAtt": [
+                    "CreateBookingLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":execute-api:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":",
+                      "fxh1zg6455",
+                      "/*"
+                    ]
+                  ]
+                }
+              }
+            },
+            "HttpApiIntegrationCreateBooking": {
+              "Type": "AWS::ApiGatewayV2::Integration",
+              "Properties": {
+                "ApiId": "fxh1zg6455",
+                "IntegrationType": "AWS_PROXY",
+                "IntegrationUri": {
+                  "Fn::GetAtt": [
+                    "CreateBookingLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "PayloadFormatVersion": "2.0",
+                "TimeoutInMillis": 30000
+              }
+            },
+            "HttpApiRoutePostBookings": {
+              "Type": "AWS::ApiGatewayV2::Route",
+              "Properties": {
+                "ApiId": "fxh1zg6455",
+                "RouteKey": "POST /bookings",
+                "Target": {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      "integrations",
+                      {
+                        "Ref": "HttpApiIntegrationCreateBooking"
+                      }
+                    ]
+                  ]
+                }
+              },
+              "DependsOn": "HttpApiIntegrationCreateBooking"
+            },
+            "BookingsTable": {
+              "Type": "AWS::DynamoDB::Table",
+              "Properties": {
+                "TableName": "BookingsTable",
+                "BillingMode": "PAY_PER_REQUEST",
+                "AttributeDefinitions": [
+                  {
+                    "AttributeName": "id",
+                    "AttributeType": "S"
+                  },
+                  {
+                    "AttributeName": "locationId",
+                    "AttributeType": "S"
+                  },
+                  {
+                    "AttributeName": "startTime",
+                    "AttributeType": "S"
+                  }
+                ],
+                "KeySchema": [
+                  {
+                    "AttributeName": "id",
+                    "KeyType": "HASH"
+                  }
+                ],
+                "GlobalSecondaryIndexes": [
+                  {
+                    "IndexName": "LocationTimeIndex",
+                    "KeySchema": [
+                      {
+                        "AttributeName": "locationId",
+                        "KeyType": "HASH"
+                      },
+                      {
+                        "AttributeName": "startTime",
+                        "KeyType": "RANGE"
+                      }
+                    ],
+                    "Projection": {
+                      "ProjectionType": "ALL"
+                    }
+                  }
+                ],
+                "StreamSpecification": {
+                  "StreamViewType": "NEW_AND_OLD_IMAGES"
+                }
+              }
+            }
+          },
+          "Outputs": {
+            "ServerlessDeploymentBucketName": {
+              "Value": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
+              "Export": {
+                "Name": "sls-booking-service-dev-ServerlessDeploymentBucketName"
+              }
+            },
+            "CreateBookingLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "CreateBookingLambdaVersioneXZpLXcEupITAqDplIk7NnQT9UlANdN1lL8ECOi738"
+              },
+              "Export": {
+                "Name": "sls-booking-service-dev-CreateBookingLambdaFunctionQualifiedArn"
+              }
+            }
+          }
+        },
+        "vpc": {}
+      },
+      "useDotenv": true,
+      "build": {
+        "esbuild": false
+      },
+      "functions": {
+        "createBooking": {
+          "handler": "src/handlers/createBookingHandler.handler",
+          "events": [
+            {
+              "httpApi": {
+                "path": "/bookings",
+                "method": "post"
+              },
+              "resolvedMethod": "POST",
+              "resolvedPath": "/bookings"
+            }
+          ],
+          "name": "booking-service-dev-createBooking",
+          "package": {
+            "artifact": ".serverless\\createBooking.zip"
+          },
+          "memory": 1024,
+          "timeout": 6,
+          "runtime": "nodejs18.x",
+          "vpc": {},
+          "versionLogicalId": "CreateBookingLambdaVersioneXZpLXcEupITAqDplIk7NnQT9UlANdN1lL8ECOi738"
+        }
+      },
+      "resources": {
+        "Resources": {
+          "BookingsTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "BookingsTable",
+              "BillingMode": "PAY_PER_REQUEST",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "id",
+                  "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "locationId",
+                  "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "startTime",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "id",
+                  "KeyType": "HASH"
+                }
+              ],
+              "GlobalSecondaryIndexes": [
+                {
+                  "IndexName": "LocationTimeIndex",
+                  "KeySchema": [
+                    {
+                      "AttributeName": "locationId",
+                      "KeyType": "HASH"
+                    },
+                    {
+                      "AttributeName": "startTime",
+                      "KeyType": "RANGE"
+                    }
+                  ],
+                  "Projection": {
+                    "ProjectionType": "ALL"
+                  }
+                }
+              ],
+              "StreamSpecification": {
+                "StreamViewType": "NEW_AND_OLD_IMAGES"
+              }
+            }
+          }
+        },
+        "Outputs": {}
+      },
+      "plugins": [
+        "serverless-webpack",
+        "serverless-offline",
+        "serverless-dotenv-plugin"
+      ],
+      "custom": {
+        "webpack": {
+          "webpackConfig": "webpack.config.js",
+          "includeModules": true,
+          "packager": "yarn",
+          "keepOutputDirectory": true
+        }
+      },
+      "package": {
+        "individually": true,
+        "patterns": [
+          "!../../../node_modules/**",
+          "../../../libs/generated/client/**",
+          "../../../node_modules/@prisma/client/**",
+          "../../../node_modules/.prisma/client/**",
+          "../../../node_modules/@prisma/engines/libquery_engine-*.so.node",
+          "../../../node_modules/.prisma/client/libquery_engine-*.so.node"
+        ],
+        "artifactsS3KeyDirname": "serverless/booking-service/dev/code-artifacts",
+        "deploymentBucket": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
+        "artifactDirectoryName": "serverless/booking-service/dev/1757496460707-2025-09-10T09:27:40.707Z"
+      }
+    },
+    "provider": {
+      "name": "aws",
+      "runtime": "nodejs18.x",
+      "region": "ap-south-1",
+      "httpApi": {
+        "id": "fxh1zg6455"
+      },
+      "environment": {
+        "DATABASE_URL": "postgresql://backendapp:backend123@salonapp.cheme8w42ux8.ap-south-1.rds.amazonaws.com/salondb",
+        "FIREBASE_SECRET_NAME": "<REDACTED>",
+        "FIREBASE_WEB_API_KEY": "<REDACTED>",
+        "CUSTOM_AWS_REGION": "ap-south-1",
+        "DYNAMODB_BOOKINGS_TABLE": "BookingsTable"
+      },
+      "iam": {
+        "role": {
+          "statements": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "ssm:GetParameter",
+                "ssm:GetParameters"
+              ],
+              "Resource": [
+                {
+                  "Fn::Sub": "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/FirebaseSDK"
+                }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:Query",
+                "dynamodb:Scan"
+              ],
+              "Resource": [
+                {
+                  "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/IdempotencyTable"
+                },
+                {
+                  "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/BookingsTable"
+                },
+                {
+                  "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/BookingsTable/index/*"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "stage": "dev",
+      "versionFunctions": true,
+      "compiledCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "CreateBookingLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/booking-service-dev-createBooking"
+            }
+          },
+          "IamRoleLambdaExecution": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "lambda.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        "booking-service",
+                        "dev",
+                        "lambda"
+                      ]
+                    ]
+                  },
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:CreateLogStream",
+                          "logs:CreateLogGroup",
+                          "logs:TagResource"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/booking-service-dev*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:PutLogEvents"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/booking-service-dev*:*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "ssm:GetParameter",
+                          "ssm:GetParameters"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/FirebaseSDK"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "dynamodb:GetItem",
+                          "dynamodb:PutItem",
+                          "dynamodb:UpdateItem",
+                          "dynamodb:DeleteItem",
+                          "dynamodb:Query",
+                          "dynamodb:Scan"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/IdempotencyTable"
+                          },
+                          {
+                            "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/BookingsTable"
+                          },
+                          {
+                            "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/BookingsTable/index/*"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ],
+              "Path": "/",
+              "RoleName": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    "booking-service",
+                    "dev",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "lambdaRole"
+                  ]
+                ]
+              }
+            }
+          },
+          "CreateBookingLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
+                "S3Key": "serverless/booking-service/dev/1757496460707-2025-09-10T09:27:40.707Z/createBooking.zip"
+              },
+              "Handler": "src/handlers/createBookingHandler.handler",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "booking-service-dev-createBooking",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "DATABASE_URL": "postgresql://backendapp:backend123@salonapp.cheme8w42ux8.ap-south-1.rds.amazonaws.com/salondb",
+                  "FIREBASE_SECRET_NAME": "<REDACTED>",
+                  "FIREBASE_WEB_API_KEY": "<REDACTED>",
+                  "CUSTOM_AWS_REGION": "ap-south-1",
+                  "DYNAMODB_BOOKINGS_TABLE": "BookingsTable"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "CreateBookingLogGroup"
+            ]
+          },
+          "CreateBookingLambdaVersioneXZpLXcEupITAqDplIk7NnQT9UlANdN1lL8ECOi738": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "CreateBookingLambdaFunction"
+              },
+              "CodeSha256": "vOCUIEk3+RyHPw2upCILYs7A4oBhjtST9xoHmKFTs4U="
+            }
+          },
+          "CreateBookingLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "CreateBookingLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    "fxh1zg6455",
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationCreateBooking": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": "fxh1zg6455",
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "Fn::GetAtt": [
+                  "CreateBookingLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRoutePostBookings": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": "fxh1zg6455",
+              "RouteKey": "POST /bookings",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationCreateBooking"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationCreateBooking"
+          },
+          "BookingsTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "BookingsTable",
+              "BillingMode": "PAY_PER_REQUEST",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "id",
+                  "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "locationId",
+                  "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "startTime",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "id",
+                  "KeyType": "HASH"
+                }
+              ],
+              "GlobalSecondaryIndexes": [
+                {
+                  "IndexName": "LocationTimeIndex",
+                  "KeySchema": [
+                    {
+                      "AttributeName": "locationId",
+                      "KeyType": "HASH"
+                    },
+                    {
+                      "AttributeName": "startTime",
+                      "KeyType": "RANGE"
+                    }
+                  ],
+                  "Projection": {
+                    "ProjectionType": "ALL"
+                  }
+                }
+              ],
+              "StreamSpecification": {
+                "StreamViewType": "NEW_AND_OLD_IMAGES"
+              }
+            }
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
+            "Export": {
+              "Name": "sls-booking-service-dev-ServerlessDeploymentBucketName"
+            }
+          },
+          "CreateBookingLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "CreateBookingLambdaVersioneXZpLXcEupITAqDplIk7NnQT9UlANdN1lL8ECOi738"
+            },
+            "Export": {
+              "Name": "sls-booking-service-dev-CreateBookingLambdaFunctionQualifiedArn"
+            }
+          }
+        }
+      },
+      "vpc": {}
+    },
+    "dashboard": {
+      "isEnabledForService": false,
+      "requiredAuthentication": false,
+      "orgFeaturesInUse": null,
+      "orgObservabilityIntegrations": null,
+      "serviceAppId": null,
+      "serviceProvider": null,
+      "instanceParameters": null
+    },
+    "serviceRawFile": "service: booking-service\n\nprovider:\n  name: aws\n  runtime: nodejs18.x\n  region: ${env:CUSTOM_AWS_REGION}\n  httpApi:\n    id: ${file(serverless-id.json):http_api_id}  \n  environment:\n    DATABASE_URL: ${env:DATABASE_URL}\n    FIREBASE_SECRET_NAME: ${env:FIREBASE_SECRET_NAME}\n    FIREBASE_WEB_API_KEY: ${env:FIREBASE_WEB_API_KEY}\n    CUSTOM_AWS_REGION: ${env:CUSTOM_AWS_REGION}\n    DYNAMODB_BOOKINGS_TABLE: ${env:DYNAMODB_BOOKINGS_TABLE}\n\n  iam:\n    role:\n      statements:\n        - Effect: Allow\n          Action:\n            - ssm:GetParameter\n            - ssm:GetParameters\n          Resource:\n            - Fn::Sub: arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${env:FIREBASE_SECRET_NAME}\n        - Effect: Allow\n          Action:\n            - dynamodb:GetItem\n            - dynamodb:PutItem\n            - dynamodb:UpdateItem\n            - dynamodb:DeleteItem\n            - dynamodb:Query\n            - dynamodb:Scan\n          Resource:\n            - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/IdempotencyTable\n            - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${env:DYNAMODB_BOOKINGS_TABLE}\n            - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${env:DYNAMODB_BOOKINGS_TABLE}/index/*\n\nuseDotenv: true\n\nbuild:\n  esbuild: false\n\nfunctions:\n  createBooking:\n    handler: src/handlers/createBookingHandler.handler\n    events:\n      - httpApi:\n          path: /bookings\n          method: post\n\nresources:\n  Resources:\n    BookingsTable:\n      Type: AWS::DynamoDB::Table\n      Properties:\n        TableName: ${env:DYNAMODB_BOOKINGS_TABLE}\n        BillingMode: PAY_PER_REQUEST\n        AttributeDefinitions:\n          - AttributeName: id\n            AttributeType: S\n          - AttributeName: locationId\n            AttributeType: S\n          - AttributeName: startTime\n            AttributeType: S\n        KeySchema:\n          - AttributeName: id\n            KeyType: HASH\n        GlobalSecondaryIndexes:\n          - IndexName: LocationTimeIndex\n            KeySchema:\n              - AttributeName: locationId\n                KeyType: HASH\n              - AttributeName: startTime\n                KeyType: RANGE\n            Projection:\n              ProjectionType: ALL\n        StreamSpecification:\n          StreamViewType: NEW_AND_OLD_IMAGES\n\nplugins:\n  - serverless-webpack\n  - serverless-offline\n  - serverless-dotenv-plugin\n\ncustom:\n  webpack:\n    webpackConfig: 'webpack.config.js'\n    includeModules: true\n    packager: 'yarn'\n    keepOutputDirectory: true\n\npackage:\n  individually: true\n  patterns:\n    - '!../../../node_modules/**'\n    - '../../../libs/generated/client/**'\n    - '../../../node_modules/@prisma/client/**'\n    - '../../../node_modules/.prisma/client/**'\n    - '../../../node_modules/@prisma/engines/libquery_engine-*.so.node'\n    - '../../../node_modules/.prisma/client/libquery_engine-*.so.node'\n",
+    "command": [
+      "deploy"
+    ],
+    "options": {},
+    "orgId": "68adf87e-d56d-4ec7-9799-1378ef84bcc0",
+    "orgName": "wearethechie",
+    "userId": "DdmZl8Q3cPDYNHfwqn",
+    "userName": "wearethechie",
+    "serviceProviderAwsAccountId": "269578498075",
+    "serviceProviderAwsCfStackName": "booking-service-dev",
+    "serviceProviderAwsCfStackId": "arn:aws:cloudformation:ap-south-1:269578498075:stack/booking-service-dev/16704800-8e15-11f0-b44b-06f2a63c0d0d",
+    "serviceProviderAwsCfStackCreated": "2025-09-10T07:09:27.110Z",
+    "serviceProviderAwsCfStackUpdated": "2025-09-10T09:18:38.222Z",
+    "serviceProviderAwsCfStackStatus": "UPDATE_COMPLETE",
+    "serviceProviderAwsCfStackOutputs": [
+      {
+        "OutputKey": "CreateBookingLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:ap-south-1:269578498075:function:booking-service-dev-createBooking:5",
+        "Description": "Current Lambda function version",
+        "ExportName": "sls-booking-service-dev-CreateBookingLambdaFunctionQualifiedArn"
+      },
+      {
+        "OutputKey": "ServerlessDeploymentBucketName",
+        "OutputValue": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
+        "ExportName": "sls-booking-service-dev-ServerlessDeploymentBucketName"
+      }
+    ],
+    "compiledCloudFormationTemplate": {
+      "AWSTemplateFormatVersion": "2010-09-09",
+      "Description": "The AWS CloudFormation template for this Serverless application",
+      "Resources": {
+        "CreateBookingLogGroup": {
+          "Type": "AWS::Logs::LogGroup",
+          "Properties": {
+            "LogGroupName": "/aws/lambda/booking-service-dev-createBooking"
+          }
+        },
+        "IamRoleLambdaExecution": {
+          "Type": "AWS::IAM::Role",
+          "Properties": {
+            "AssumeRolePolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": [
+                      "lambda.amazonaws.com"
+                    ]
+                  },
+                  "Action": [
+                    "sts:AssumeRole"
+                  ]
+                }
+              ]
+            },
+            "Policies": [
+              {
+                "PolicyName": {
+                  "Fn::Join": [
+                    "-",
+                    [
+                      "booking-service",
+                      "dev",
+                      "lambda"
+                    ]
+                  ]
+                },
+                "PolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "logs:CreateLogStream",
+                        "logs:CreateLogGroup",
+                        "logs:TagResource"
+                      ],
+                      "Resource": [
+                        {
+                          "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/booking-service-dev*:*"
+                        }
+                      ]
+                    },
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "logs:PutLogEvents"
+                      ],
+                      "Resource": [
+                        {
+                          "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/booking-service-dev*:*:*"
+                        }
+                      ]
+                    },
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "ssm:GetParameter",
+                        "ssm:GetParameters"
+                      ],
+                      "Resource": [
+                        {
+                          "Fn::Sub": "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/FirebaseSDK"
+                        }
+                      ]
+                    },
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "dynamodb:GetItem",
+                        "dynamodb:PutItem",
+                        "dynamodb:UpdateItem",
+                        "dynamodb:DeleteItem",
+                        "dynamodb:Query",
+                        "dynamodb:Scan"
+                      ],
+                      "Resource": [
+                        {
+                          "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/IdempotencyTable"
+                        },
+                        {
+                          "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/BookingsTable"
+                        },
+                        {
+                          "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/BookingsTable/index/*"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ],
+            "Path": "/",
+            "RoleName": {
+              "Fn::Join": [
+                "-",
+                [
+                  "booking-service",
+                  "dev",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  "lambdaRole"
+                ]
+              ]
+            }
+          }
+        },
+        "CreateBookingLambdaFunction": {
+          "Type": "AWS::Lambda::Function",
+          "Properties": {
+            "Code": {
+              "S3Bucket": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
+              "S3Key": "serverless/booking-service/dev/1757496460707-2025-09-10T09:27:40.707Z/createBooking.zip"
+            },
+            "Handler": "src/handlers/createBookingHandler.handler",
+            "Runtime": "nodejs18.x",
+            "FunctionName": "booking-service-dev-createBooking",
+            "MemorySize": 1024,
+            "Timeout": 6,
+            "Environment": {
+              "Variables": {
+                "DATABASE_URL": "postgresql://backendapp:backend123@salonapp.cheme8w42ux8.ap-south-1.rds.amazonaws.com/salondb",
+                "FIREBASE_SECRET_NAME": "<REDACTED>",
+                "FIREBASE_WEB_API_KEY": "<REDACTED>",
+                "CUSTOM_AWS_REGION": "ap-south-1",
+                "DYNAMODB_BOOKINGS_TABLE": "BookingsTable"
+              }
+            },
+            "Role": {
+              "Fn::GetAtt": [
+                "IamRoleLambdaExecution",
+                "Arn"
+              ]
+            }
+          },
+          "DependsOn": [
+            "CreateBookingLogGroup"
+          ]
+        },
+        "CreateBookingLambdaVersioneXZpLXcEupITAqDplIk7NnQT9UlANdN1lL8ECOi738": {
+          "Type": "AWS::Lambda::Version",
+          "DeletionPolicy": "Retain",
+          "Properties": {
+            "FunctionName": {
+              "Ref": "CreateBookingLambdaFunction"
+            },
+            "CodeSha256": "vOCUIEk3+RyHPw2upCILYs7A4oBhjtST9xoHmKFTs4U="
+          }
+        },
+        "CreateBookingLambdaPermissionHttpApi": {
+          "Type": "AWS::Lambda::Permission",
+          "Properties": {
+            "FunctionName": {
+              "Fn::GetAtt": [
+                "CreateBookingLambdaFunction",
+                "Arn"
+              ]
+            },
+            "Action": "lambda:InvokeFunction",
+            "Principal": "apigateway.amazonaws.com",
+            "SourceArn": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:",
+                  {
+                    "Ref": "AWS::Partition"
+                  },
+                  ":execute-api:",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId"
+                  },
+                  ":",
+                  "fxh1zg6455",
+                  "/*"
+                ]
+              ]
+            }
+          }
+        },
+        "HttpApiIntegrationCreateBooking": {
+          "Type": "AWS::ApiGatewayV2::Integration",
+          "Properties": {
+            "ApiId": "fxh1zg6455",
+            "IntegrationType": "AWS_PROXY",
+            "IntegrationUri": {
+              "Fn::GetAtt": [
+                "CreateBookingLambdaFunction",
+                "Arn"
+              ]
+            },
+            "PayloadFormatVersion": "2.0",
+            "TimeoutInMillis": 30000
+          }
+        },
+        "HttpApiRoutePostBookings": {
+          "Type": "AWS::ApiGatewayV2::Route",
+          "Properties": {
+            "ApiId": "fxh1zg6455",
+            "RouteKey": "POST /bookings",
+            "Target": {
+              "Fn::Join": [
+                "/",
+                [
+                  "integrations",
+                  {
+                    "Ref": "HttpApiIntegrationCreateBooking"
+                  }
+                ]
+              ]
+            }
+          },
+          "DependsOn": "HttpApiIntegrationCreateBooking"
+        },
+        "BookingsTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "BookingsTable",
+            "BillingMode": "PAY_PER_REQUEST",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "id",
+                "AttributeType": "S"
+              },
+              {
+                "AttributeName": "locationId",
+                "AttributeType": "S"
+              },
+              {
+                "AttributeName": "startTime",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "id",
+                "KeyType": "HASH"
+              }
+            ],
+            "GlobalSecondaryIndexes": [
+              {
+                "IndexName": "LocationTimeIndex",
+                "KeySchema": [
+                  {
+                    "AttributeName": "locationId",
+                    "KeyType": "HASH"
+                  },
+                  {
+                    "AttributeName": "startTime",
+                    "KeyType": "RANGE"
+                  }
+                ],
+                "Projection": {
+                  "ProjectionType": "ALL"
+                }
+              }
+            ],
+            "StreamSpecification": {
+              "StreamViewType": "NEW_AND_OLD_IMAGES"
+            }
+          }
+        }
+      },
+      "Outputs": {
+        "ServerlessDeploymentBucketName": {
+          "Value": "serverless-framework-deployments-ap-south-1-cb00259d-5c2e",
+          "Export": {
+            "Name": "sls-booking-service-dev-ServerlessDeploymentBucketName"
+          }
+        },
+        "CreateBookingLambdaFunctionQualifiedArn": {
+          "Description": "Current Lambda function version",
+          "Value": {
+            "Ref": "CreateBookingLambdaVersioneXZpLXcEupITAqDplIk7NnQT9UlANdN1lL8ECOi738"
+          },
+          "Export": {
+            "Name": "sls-booking-service-dev-CreateBookingLambdaFunctionQualifiedArn"
+          }
+        }
+      }
+    }
+  }
+}

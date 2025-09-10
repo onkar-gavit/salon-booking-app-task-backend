@@ -33,8 +33,7 @@ provider:
           Resource:
             - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/IdempotencyTable
 
-build:
-  esbuild: false
+useDotenv: true
 
 functions:
   createCustomer:

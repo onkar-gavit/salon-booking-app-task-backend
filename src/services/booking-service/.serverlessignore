@@ -1,0 +1,13 @@
+node_modules/
+.git/
+.env
+*.log
+.DS_Store
+.vscode/
+.idea/
+coverage/
+.nyc_output/
+*.test.ts
+*.spec.ts
+src/**/*.test.ts
+src/**/*.spec.ts

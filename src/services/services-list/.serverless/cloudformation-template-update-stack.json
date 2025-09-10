@@ -190,7 +190,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/services-list/dev/1757456806298-2025-09-09T22:26:46.298Z/services-list.zip"
+          "S3Key": "serverless/services-list/dev/1757497418469-2025-09-10T09:43:38.469Z/services-list.zip"
         },
         "Handler": "src/handlers/getServicesHandler.handler",
         "Runtime": "nodejs18.x",
@@ -216,14 +216,14 @@
         "GetServicesLogGroup"
       ]
     },
-    "GetServicesLambdaVersion8ZPqUijKkgQgNRHydS6yt833b1tMV66SxwFybyddM": {
+    "GetServicesLambdaVersionQzpBVfX8MOx8JRCkFYVC8s21BCa3Cecw1sCCt2bk6M": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "GetServicesLambdaFunction"
         },
-        "CodeSha256": "oN9T0hVs/vQ3nAVGyw2RAa+Sb0+vcike2XxcNZCi1CA="
+        "CodeSha256": "WvDMCQMKqqTyS1lB9oA9laFLrplijGjBVXJbncREDgQ="
       }
     },
     "GetServicesLambdaPermissionHttpApi": {
@@ -308,7 +308,7 @@
     "GetServicesLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "GetServicesLambdaVersion8ZPqUijKkgQgNRHydS6yt833b1tMV66SxwFybyddM"
+        "Ref": "GetServicesLambdaVersionQzpBVfX8MOx8JRCkFYVC8s21BCa3Cecw1sCCt2bk6M"
       },
       "Export": {
         "Name": "sls-services-list-dev-GetServicesLambdaFunctionQualifiedArn"

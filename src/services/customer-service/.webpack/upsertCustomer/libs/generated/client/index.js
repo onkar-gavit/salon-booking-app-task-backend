@@ -171,6 +171,10 @@ const config = {
       {
         "fromEnvVar": null,
         "value": "rhel-openssl-1.0.x"
+      },
+      {
+        "fromEnvVar": null,
+        "value": "rhel-openssl-3.0.x"
       }
     ],
     "previewFeatures": [],
@@ -178,7 +182,8 @@ const config = {
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": null
+    "rootEnvPath": null,
+    "schemaEnvPath": "../../../.env"
   },
   "relativePath": "../../../prisma",
   "clientVersion": "6.15.0",
@@ -187,7 +192,6 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
-  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
@@ -196,8 +200,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "generator client {\n  provider      = \"prisma-client-js\"\n  binaryTargets = [\"native\", \"rhel-openssl-1.0.x\"]\n  output        = \"../libs/generated/client\" // because we are using laetest ORM version there's output should be use for client generate\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  id          String   @id @default(uuid())\n  firebaseUid String   @unique\n  email       String   @unique\n  name        String\n  createdAt   DateTime @default(now())\n  updatedAt   DateTime @updatedAt\n}\n\nmodel Customer {\n  id         String   @id @default(uuid())\n  businessId String // Business identifier from JWT token\n  phone      String\n  name       String\n  email      String?\n  createdAt  DateTime @default(now())\n  updatedAt  DateTime @updatedAt\n\n  @@unique([businessId, phone], name: \"unique_phone_per_business\")\n}\n\nmodel Service {\n  id          String   @id @default(uuid())\n  businessId  String // Business identifier from JWT token\n  name        String\n  description String?\n  duration    Int // Duration in minutes\n  price       Decimal  @db.Decimal(10, 2)\n  isActive    Boolean  @default(true)\n  createdAt   DateTime @default(now())\n  updatedAt   DateTime @updatedAt\n\n  @@index([businessId])\n}\n",
-  "inlineSchemaHash": "8390f2fe130663539416ca033a89b535a5d618968dcdd25a502223b579e60e69",
+  "inlineSchema": "generator client {\n  provider      = \"prisma-client-js\"\n  binaryTargets = [\"native\", \"rhel-openssl-1.0.x\", \"rhel-openssl-3.0.x\"]\n  output        = \"../libs/generated/client\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  id          String   @id @default(uuid())\n  firebaseUid String   @unique\n  email       String   @unique\n  name        String\n  createdAt   DateTime @default(now())\n  updatedAt   DateTime @updatedAt\n}\n\nmodel Customer {\n  id         String   @id @default(uuid())\n  businessId String // Business identifier from JWT token\n  phone      String\n  name       String\n  email      String?\n  createdAt  DateTime @default(now())\n  updatedAt  DateTime @updatedAt\n\n  @@unique([businessId, phone], name: \"unique_phone_per_business\")\n}\n\nmodel Service {\n  id          String   @id @default(uuid())\n  businessId  String // Business identifier from JWT token\n  name        String\n  description String?\n  duration    Int // Duration in minutes\n  price       Decimal  @db.Decimal(10, 2)\n  isActive    Boolean  @default(true)\n  createdAt   DateTime @default(now())\n  updatedAt   DateTime @updatedAt\n\n  @@index([businessId])\n}\n",
+  "inlineSchemaHash": "98e7b3f371675de4d1be51e109c8605e42bfecf36dd259a740f5c58a1bbfc140",
   "copyEngine": true
 }
 
@@ -242,6 +246,10 @@ path.join(process.cwd(), "libs/generated/client/query_engine-windows.dll.node")
 // file annotations for bundling tools to include these files
 path.join(__dirname, "libquery_engine-rhel-openssl-1.0.x.so.node");
 path.join(process.cwd(), "libs/generated/client/libquery_engine-rhel-openssl-1.0.x.so.node")
+
+// file annotations for bundling tools to include these files
+path.join(__dirname, "libquery_engine-rhel-openssl-3.0.x.so.node");
+path.join(process.cwd(), "libs/generated/client/libquery_engine-rhel-openssl-3.0.x.so.node")
 // file annotations for bundling tools to include these files
 path.join(__dirname, "schema.prisma");
 path.join(process.cwd(), "libs/generated/client/schema.prisma")

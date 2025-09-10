@@ -1,7 +1,7 @@
 generator client {
   provider      = "prisma-client-js"
-  binaryTargets = ["native", "rhel-openssl-1.0.x"]
-  output        = "../libs/generated/client" // because we are using laetest ORM version there's output should be use for client generate
+  binaryTargets = ["native", "rhel-openssl-1.0.x", "rhel-openssl-3.0.x"]
+  output        = "../libs/generated/client"
 }
 
 datasource db {
